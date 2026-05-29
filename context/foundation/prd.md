@@ -144,9 +144,7 @@ The system selects the exercise set, session sequence, and difficulty level for 
 
 The rule consumes five user-supplied inputs: stated training goal (e.g., strength, hypertrophy, cardio endurance, fat loss); experience level (beginner, intermediate, advanced); available equipment (e.g., full gym, home dumbbells, bodyweight only); preferred training style (e.g., full-body, push-pull-legs, circuit); and the number of sessions per week the user can commit to.
 
-The rule's output is a weekly plan: N sessions (where N is the user's stated sessions-per-week), each containing an ordered list of exercises from the exercise library, matched to the user's profile. The plan is the primary artifact the user interacts with.
-
-In the MVP, the plan is derived solely from the profile captured during onboarding. Historical workout performance is not an input to plan generation in the MVP — adapting the plan based on what the user actually did is scoped to a future version.
+The rule's output is a weekly plan: N personal workouts (where N is the user's stated sessions-per-week), each containing an ordered list of exercises from the exercise library, matched to the user's profile. The plan is stored as an ordered rotation — the app suggests the next workout in the sequence each time the user opens it, based on which workout was completed last, not on the calendar day. In the MVP, the plan is derived solely from the profile captured during onboarding. Historical workout performance is not an input to plan generation in the MVP — adapting the plan based on what the user actually did is scoped to a future version.
 
 ## Access Control
 
@@ -158,13 +156,25 @@ There is no admin panel in the MVP. The exercise library is seeded by the develo
 
 Unauthenticated requests to any protected route are rejected and redirected to the login screen.
 
+## Future Vision (Post-MVP)
+
+The following capabilities are out of MVP scope but inform architecture decisions — particularly the database schema in F-01. Recording them here ensures that MVP design choices remain compatible with the intended product direction.
+
+- **Editable profile:** The onboarding survey can be re-taken or updated at any time. Changing the profile may trigger a new plan generation. The schema is designed to support this; the UI is deferred. (Resolves OQ-001 at V2.)
+- **Workout template library:** A curated set of workout templates seeded by the developer (e.g., "Push Day A", "Full Body Beginner"). Users can browse and copy any template to their personal workout list.
+- **Personal workout library:** Users maintain their own list of workouts — copies from the template library, AI-generated workouts, or workouts built from scratch. Each personal workout is fully editable (add/remove exercises, change sets/reps targets).
+- **Workout-first navigation:** The primary entry point is a workout list, not a plan page. At the top is the suggested next workout (next in the user's rotation). The user can also pick any workout from their personal library or the system library.
+- **Adaptive AI plan generation:** The AI considers workout history (completed sessions, logged weights, progression signals) alongside the survey profile when generating or updating the training plan.
+
 ## Non-Goals
 
-- **Adaptive planning (V2):** The system does not analyze workout history to adjust plans or suggest weight progression. This is explicitly scoped to a future version.
+- **Adaptive planning (V2):** The system does not analyze workout history to adjust plans or suggest weight progression. This is explicitly scoped to a future version. See Future Vision.
 - **Calendar view:** No visual monthly or weekly calendar grid. A simple chronological list is the complete history interface in MVP.
 - **Social features:** No workout sharing, friend activity feeds, or competitive leaderboards. The product is private and single-user in its social model.
 - **Monetization:** No in-app purchases, subscription paywalls, or advertising. The product is intended to remain free and private.
-- **Profile editing:** No in-app form to update onboarding survey answers. If a user's goal or equipment changes, they cannot update their profile in MVP. See OQ-001.
+- **Profile editing:** No in-app form to update onboarding survey answers in MVP. The schema supports it; the UI is deferred to V2. See OQ-001 and Future Vision.
+- **Workout template library browser:** The `workout_templates` table is created in F-01 for architectural readiness, but the UI to browse and copy templates is deferred to V2.
+- **Personal workout editing UI:** Users cannot edit their workout exercises in MVP — the plan is executed as generated. Editing UI is deferred to V2.
 
 ## Open Questions
 

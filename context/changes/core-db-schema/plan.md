@@ -348,15 +348,15 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: `npx supabase db reset` exits 0
-- [ ] 1.2 All 9 tables exist: `SELECT tablename FROM pg_tables WHERE schemaname = 'public'` confirms all names
-- [ ] 1.3 `npm run lint` passes
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` exits 0
+- [x] 1.2 All 9 tables exist: `SELECT tablename FROM pg_tables WHERE schemaname = 'public'` confirms all names
+- [x] 1.3 `npm run lint` passes
 
 #### Manual
 
-- [ ] 1.4 All 9 tables visible in Supabase Studio Table Editor
-- [ ] 1.5 All 6 ENUMs visible under Database → Types in Studio
-- [ ] 1.6 RLS check: SELECT from `workouts` as `anon` role returns 0 rows
+- [x] 1.4 All 9 tables visible in Supabase Studio Table Editor
+- [x] 1.5 All 6 ENUMs visible under Database → Types in Studio
+- [x] 1.6 RLS check: SELECT from `workouts` as `anon` role returns 0 rows
 
 ### Phase 2: Exercise Seed Data
 

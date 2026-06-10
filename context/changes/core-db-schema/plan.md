@@ -218,54 +218,120 @@ Policy pattern for workout_sets (ownership via `workout_sessions.user_id`):
 
 ---
 
-## Phase 2: Exercise Seed Data
+## Phase 2: Exercise Detail Fields Migration
 
 ### Overview
 
-Populate `supabase/seed.sql` with ~72 exercises covering all 8 muscle groups at all 3 difficulty levels (~3 exercises per muscle_group × difficulty combination). Equipment values must be drawn from the controlled vocabulary: `'barbell'`, `'dumbbell'`, `'bodyweight'`, `'machine'`, `'cable'`, `'resistance_band'`, `'kettlebell'`.
+Add six detail columns to the `exercises` table so each exercise can carry its full Polish-language content (description, instructions, muscles, tips, mistakes). These columns are populated in Phase 3 from SmartWorkout scraping. All columns are nullable so the migration does not break the Phase 1 data already in the table.
 
 ### Changes Required
 
-#### 1. Seed file
+#### 1. Migration file
 
-**File**: `supabase/seed.sql`
+**File**: `supabase/migrations/20260529000001_exercise_detail_fields.sql`
 
-**Intent**: Insert exercises that give the AI enough variety to match any user profile combination (training_goal × experience_level × preferred_style × equipment). At least one exercise per muscle_group × difficulty cell. Bodyweight exercises must exist for users with `equipment = '{bodyweight}'`.
+**Intent**: Extend `exercises` with one column per content section, preserving all existing rows.
 
-**Contract**: All INSERTs target the `exercises` table. Each row specifies `name`, `muscle_group` (one of the 8 enum values), `difficulty` (one of the 3 enum values), and `equipment` (one value from the controlled vocabulary). The seed file is safe to re-run after `db reset` because `db reset` drops and recreates tables first. No `ON CONFLICT` clause needed.
+**Contract**:
 
-Target distribution:
-- `chest` (beginner: Push-up, Incline Push-up, Chest Dip; intermediate: Bench Press, Dumbbell Fly, Cable Crossover; advanced: Weighted Dip, Barbell Incline Press, Decline Bench Press)
-- `back` (beginner: Band Pull-Apart, Inverted Row, Superman; intermediate: Dumbbell Row, Lat Pulldown, Cable Row; advanced: Deadlift, Pull-up, Barbell Bent Row)
-- `shoulders` (beginner: Band Lateral Raise, Pike Push-up, Shoulder Tap; intermediate: Dumbbell Shoulder Press, Lateral Raise, Front Raise; advanced: Barbell Overhead Press, Arnold Press, Cable Face Pull)
-- `arms` (beginner: Band Curl, Diamond Push-up, Tricep Dip; intermediate: Dumbbell Curl, Overhead Tricep Extension, Hammer Curl; advanced: Barbell Curl, Close-Grip Bench Press, Cable Pushdown)
-- `core` (beginner: Crunch, Plank, Dead Bug; intermediate: Hanging Knee Raise, Russian Twist, Ab Wheel; advanced: Hanging Leg Raise, Dragon Flag, Cable Crunch)
-- `legs` (beginner: Bodyweight Squat, Lunge, Step-up; intermediate: Goblet Squat, Romanian Deadlift, Leg Press; advanced: Barbell Back Squat, Barbell Front Squat, Bulgarian Split Squat)
-- `glutes` (beginner: Glute Bridge, Clamshell, Donkey Kick; intermediate: Hip Thrust, Sumo Deadlift, Cable Kickback; advanced: Barbell Hip Thrust, Single-Leg Romanian Deadlift, Weighted Glute Bridge)
-- `cardio` (beginner: Jumping Jacks, March in Place, Low-Impact Burpee; intermediate: Jump Rope, Box Jump, Kettlebell Swing; advanced: Battle Ropes, Assault Bike Sprint, Burpee Pull-up)
+```sql
+ALTER TABLE exercises
+  ADD COLUMN description      TEXT,
+  ADD COLUMN instructions     TEXT[],
+  ADD COLUMN muscles_primary  TEXT[],
+  ADD COLUMN muscles_secondary TEXT[],
+  ADD COLUMN tips             TEXT[],
+  ADD COLUMN common_mistakes  TEXT[];
+```
+
+No new RLS policies are needed — the existing `exercises_select` policy covers all columns on the table.
 
 ### Success Criteria
 
 #### Automated Verification
 
-- `npx supabase db reset` exits 0 and seeds run without error
-- `SELECT COUNT(*) FROM exercises` returns ≥ 72
-- `SELECT muscle_group, difficulty, COUNT(*) FROM exercises GROUP BY 1, 2 ORDER BY 1, 2` — each of the 24 cells has ≥ 3 rows
+- `npx supabase db reset` exits 0 (both migrations apply cleanly)
+- `SELECT column_name FROM information_schema.columns WHERE table_name = 'exercises' ORDER BY ordinal_position` — all 12 columns present (6 original + 6 new)
 
 #### Manual Verification
 
-- In Supabase Studio Table Editor, scan exercises rows — names are readable, no obvious data errors
-- Verify at least one `equipment = 'bodyweight'` exercise per muscle_group (critical for users with no equipment)
+- Studio → Table Editor → `exercises` — new columns visible with NULL values for seeded rows
 
-**Implementation Note**: Pause after seed verification before proceeding to Phase 3.
+**Implementation Note**: Pause after automated verification and manual check before proceeding to Phase 3.
 
 ---
 
-## Phase 3: TypeScript Types
+## Phase 3: Exercise Seed Data
 
 ### Overview
 
-Write `src/types.ts` containing ENUM union types, entity interfaces matching the migration schema exactly, and DTO types for the most common API response shapes. All downstream slices import from this file.
+Populate `supabase/seed.sql` with ~820 exercises scraped from SmartWorkout.app (all detail fields in Polish, copied directly from the source), plus cardio exercises and workout templates authored by a professional trainer. The result seeds three tables: `exercises`, `workout_templates`, `workout_template_exercises`.
+
+Full scraping strategy and Claude prompts are documented in `context/changes/core-db-schema/exercise-scraping.md`.
+
+### Changes Required
+
+#### 1. Scraper script
+
+**File**: `scripts/scrape-exercises.mjs`
+
+**Intent**: Fetch 9 category listing pages from SmartWorkout, then each exercise's detail page, and output `exercises-raw.json` with one object per exercise containing all scraped Polish-language fields.
+
+**Output fields per exercise**:
+- `name` — Polish name (copied from page h1)
+- `muscle_group` — assigned from category URL context
+- `tags` — SmartWorkout tags (e.g. `["Siła", "Ciągnące"]`) — used to infer difficulty/equipment
+- `description` — intro paragraph (Polish, copied verbatim)
+- `instructions` — array of step strings (Polish, copied verbatim)
+- `muscles_primary` — array of primary muscle names (Polish, copied verbatim)
+- `muscles_secondary` — array of secondary muscle names (Polish, copied verbatim)
+- `tips` — array of tip strings (Polish, copied verbatim)
+- `common_mistakes` — array of mistake strings (Polish, copied verbatim)
+
+**Notes**: `exercises-raw.json` is gitignored (intermediate artifact). ~820 HTTP requests with 500 ms throttle ≈ 7 minutes runtime.
+
+#### 2. Seed file
+
+**File**: `supabase/seed.sql`
+
+**Intent**: Three ordered INSERT blocks that fully populate the exercise library and template system.
+
+**Block 1 — exercises**: ~820 rows from SmartWorkout (scraped data, Polish) + 9 cardio exercises (authored by a professional trainer, Polish, all detail fields included). Each row covers all 12 columns of `exercises`. `equipment` and `difficulty` are inferred by Claude from exercise name and tags — see `exercise-scraping.md` Faza 2 for the prompt and mapping rules.
+
+Cardio exercises (9 total, 3 per difficulty) are selected as a professional trainer would: movements proven effective for cardiovascular conditioning, appropriate to skill level, achievable without specialized equipment where possible. All cardio rows carry full description/instructions/muscles/tips/common_mistakes in Polish.
+
+**Block 2 — workout_templates**: 8 templates authored by a professional trainer covering the full matrix of `target_goal × preferred_style × experience_level`. Templates must represent programs a certified personal trainer would confidently prescribe — scientifically grounded exercise selection, appropriate volume/intensity for the stated difficulty, balanced muscle group coverage. Full list in `exercise-scraping.md` Faza 3.
+
+**Block 3 — workout_template_exercises**: FK references resolved via `SELECT id FROM exercises WHERE name = '...'` subqueries (avoids hardcoded UUIDs). Each template: 6–8 exercises with `target_sets` and `target_reps` matching the training goal.
+
+**Contract**: All three INSERT blocks must succeed in a single `db reset`. Block 3 must follow blocks 1 and 2 due to FK dependencies.
+
+### Success Criteria
+
+#### Automated Verification
+
+- `npx supabase db reset` exits 0 with all three seed blocks
+- `SELECT COUNT(*) FROM exercises` ≥ 820
+- `SELECT muscle_group, difficulty, COUNT(*) FROM exercises GROUP BY 1, 2 ORDER BY 1, 2` — each of 24 cells ≥ 3 rows
+- `SELECT COUNT(*) FROM workout_templates` = 8
+- `SELECT wt.name, COUNT(wte.id) FROM workout_templates wt JOIN workout_template_exercises wte ON wte.template_id = wt.id GROUP BY wt.name` — each template has 6–8 exercises
+
+#### Manual Verification
+
+- Studio → exercises: Polish names, readable descriptions, all 6 detail columns populated (no unexpected NULLs)
+- Studio → exercises: at least one `equipment = 'bodyweight'` per muscle_group (critical for users with no equipment)
+- Studio → workout_templates: 8 rows with sensible names, target_goal, difficulty
+- Studio → workout_template_exercises: exercises in each template are logically consistent with the template's goal and difficulty
+
+**Implementation Note**: Pause after seed verification before proceeding to Phase 4.
+
+---
+
+## Phase 4: TypeScript Types
+
+### Overview
+
+Write `src/types.ts` containing ENUM union types, entity interfaces matching the full migration schema (including the six new exercise detail columns added in Phase 2), and DTO types for the most common API response shapes. All downstream slices import from this file.
 
 ### Changes Required
 
@@ -287,7 +353,7 @@ Write `src/types.ts` containing ENUM union types, entity interfaces matching the
 
 **Entity interfaces** (field names = column names, types match DB types):
 - `UserProfile` — all columns of `user_profiles` (equipment as `string[]`)
-- `Exercise` — all columns of `exercises`
+- `Exercise` — all columns of `exercises`; detail fields nullable: `description: string | null`, `instructions: string[] | null`, `muscles_primary: string[] | null`, `muscles_secondary: string[] | null`, `tips: string[] | null`, `common_mistakes: string[] | null`
 - `WorkoutTemplate` — all columns of `workout_templates`
 - `WorkoutTemplateExercise` — all columns of `workout_template_exercises`
 - `Workout` — all columns of `workouts` (template_id as `string | null`)
@@ -311,7 +377,7 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Manual Verification
 
-- Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all fields
+- Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields including the six detail columns
 
 **Implementation Note**: After lint passes, the plan is complete.
 
@@ -321,17 +387,21 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 ### Manual Testing Steps
 
-1. Run `npx supabase start` then `npx supabase db reset` — confirm it applies cleanly
-2. Open Studio (`http://localhost:54323`) → Table Editor — verify all 9 tables
+1. Run `npx supabase start` then `npx supabase db reset` — confirm both migrations apply and seed runs cleanly
+2. Open Studio (`http://localhost:54323`) → Table Editor — verify all 9 tables and 12 columns on `exercises`
 3. SQL Editor: `SELECT muscle_group, difficulty, COUNT(*) FROM exercises GROUP BY 1, 2` — confirm distribution
 4. SQL Editor: test RLS by switching role to `anon` and attempting `SELECT * FROM workouts` — confirm 0 rows returned (not an error)
-5. Run `npm run lint` from project root — confirm clean
+5. SQL Editor: `SELECT name, description, instructions FROM exercises LIMIT 5` — confirm Polish content, arrays properly stored
+6. SQL Editor: `SELECT wt.name, COUNT(wte.id) FROM workout_templates wt JOIN workout_template_exercises wte ON wte.template_id=wt.id GROUP BY wt.name` — confirm all 8 templates have exercises
+7. Run `npm run lint` from project root — confirm clean
 
 ## Migration Notes
 
-- `supabase/migrations/` directory must be created before adding the migration file (it doesn't exist yet)
-- The seed file path `supabase/seed.sql` is already declared in `supabase/config.toml` — just create the file, no config change needed
+- `supabase/migrations/` directory already created in Phase 1
+- Two migration files apply in filename order: `20260529000000_core_schema.sql` then `20260529000001_exercise_detail_fields.sql`
+- The seed file path `supabase/seed.sql` is already declared in `supabase/config.toml`
 - If local Supabase is not running: `npx supabase start` before `npx supabase db reset`
+- `exercises-raw.json` (scraper output) must be added to `.gitignore` before committing Phase 3
 
 ## References
 
@@ -348,36 +418,50 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset` exits 0
-- [x] 1.2 All 9 tables exist: `SELECT tablename FROM pg_tables WHERE schemaname = 'public'` confirms all names
-- [x] 1.3 `npm run lint` passes
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` exits 0 — ef76eee
+- [x] 1.2 All 9 tables exist: `SELECT tablename FROM pg_tables WHERE schemaname = 'public'` confirms all names — ef76eee
+- [x] 1.3 `npm run lint` passes — ef76eee
 
 #### Manual
 
-- [x] 1.4 All 9 tables visible in Supabase Studio Table Editor
-- [x] 1.5 All 6 ENUMs visible under Database → Types in Studio
-- [x] 1.6 RLS check: SELECT from `workouts` as `anon` role returns 0 rows
+- [x] 1.4 All 9 tables visible in Supabase Studio Table Editor — ef76eee
+- [x] 1.5 All 6 ENUMs visible under Database → Types in Studio — ef76eee
+- [x] 1.6 RLS check: SELECT from `workouts` as `anon` role returns 0 rows — ef76eee
 
-### Phase 2: Exercise Seed Data
+### Phase 2: Exercise Detail Fields Migration
 
 #### Automated
 
-- [ ] 2.1 `npx supabase db reset` exits 0 with seed
-- [ ] 2.2 `SELECT COUNT(*) FROM exercises` ≥ 72
-- [ ] 2.3 Each of 24 muscle_group × difficulty cells has ≥ 3 rows
+- [ ] 2.1 `npx supabase db reset` exits 0 (both migrations apply)
+- [ ] 2.2 All 12 columns present on `exercises` table (`information_schema.columns` check)
 
 #### Manual
 
-- [ ] 2.4 Exercise names are readable and correct in Studio
-- [ ] 2.5 At least one `equipment = 'bodyweight'` exercise per muscle_group
+- [ ] 2.3 New columns visible in Studio Table Editor with NULL values for existing rows
 
-### Phase 3: TypeScript Types
+### Phase 3: Exercise Seed Data
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes with zero errors
-- [ ] 3.2 `astro sync` exits 0
+- [ ] 3.1 `npx supabase db reset` exits 0 with all seed blocks
+- [ ] 3.2 `SELECT COUNT(*) FROM exercises` ≥ 820
+- [ ] 3.3 Each of 24 muscle_group × difficulty cells has ≥ 3 rows
+- [ ] 3.4 `SELECT COUNT(*) FROM workout_templates` = 8
+- [ ] 3.5 Each template has 6–8 exercises in `workout_template_exercises`
 
 #### Manual
 
-- [ ] 3.3 Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all fields
+- [ ] 3.6 Polish exercise names, readable descriptions, detail columns populated in Studio
+- [ ] 3.7 At least one `equipment = 'bodyweight'` exercise per muscle_group
+- [ ] 3.8 Workout templates are logically consistent (goal × difficulty × exercise selection)
+
+### Phase 4: TypeScript Types
+
+#### Automated
+
+- [ ] 4.1 `npm run lint` passes with zero errors
+- [ ] 4.2 `astro sync` exits 0
+
+#### Manual
+
+- [ ] 4.3 Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields

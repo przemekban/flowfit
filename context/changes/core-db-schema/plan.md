@@ -432,12 +432,12 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Automated
 
-- [ ] 2.1 `npx supabase db reset` exits 0 (both migrations apply)
-- [ ] 2.2 All 12 columns present on `exercises` table (`information_schema.columns` check)
+- [x] 2.1 `npx supabase db reset` exits 0 (both migrations apply)
+- [x] 2.2 All 12 columns present on `exercises` table (`information_schema.columns` check)
 
 #### Manual
 
-- [ ] 2.3 New columns visible in Studio Table Editor with NULL values for existing rows
+- [x] 2.3 New columns visible in Studio Table Editor with NULL values for existing rows
 
 ### Phase 3: Exercise Seed Data
 

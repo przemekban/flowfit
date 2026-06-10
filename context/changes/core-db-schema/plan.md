@@ -432,28 +432,28 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Automated
 
-- [x] 2.1 `npx supabase db reset` exits 0 (both migrations apply)
-- [x] 2.2 All 12 columns present on `exercises` table (`information_schema.columns` check)
+- [x] 2.1 `npx supabase db reset` exits 0 (both migrations apply) — 8769f7c
+- [x] 2.2 All 12 columns present on `exercises` table (`information_schema.columns` check) — 8769f7c
 
 #### Manual
 
-- [x] 2.3 New columns visible in Studio Table Editor with NULL values for existing rows
+- [x] 2.3 New columns visible in Studio Table Editor with NULL values for existing rows — 8769f7c
 
 ### Phase 3: Exercise Seed Data
 
 #### Automated
 
-- [ ] 3.1 `npx supabase db reset` exits 0 with all seed blocks
-- [ ] 3.2 `SELECT COUNT(*) FROM exercises` ≥ 820
-- [ ] 3.3 Each of 24 muscle_group × difficulty cells has ≥ 3 rows
-- [ ] 3.4 `SELECT COUNT(*) FROM workout_templates` = 8
-- [ ] 3.5 Each template has 6–8 exercises in `workout_template_exercises`
+- [x] 3.1 `npx supabase db reset` exits 0 with all seed blocks
+- [x] 3.2 `SELECT COUNT(*) FROM exercises` ≥ 820
+- [x] 3.3 Each of 24 muscle_group × difficulty cells has ≥ 3 rows
+- [x] 3.4 `SELECT COUNT(*) FROM workout_templates` = 8
+- [x] 3.5 Each template has 6–8 exercises in `workout_template_exercises`
 
 #### Manual
 
-- [ ] 3.6 Polish exercise names, readable descriptions, detail columns populated in Studio
-- [ ] 3.7 At least one `equipment = 'bodyweight'` exercise per muscle_group
-- [ ] 3.8 Workout templates are logically consistent (goal × difficulty × exercise selection)
+- [x] 3.6 Polish exercise names, readable descriptions, detail columns populated in Studio
+- [x] 3.7 At least one `equipment = 'bodyweight'` exercise per muscle_group
+- [x] 3.8 Workout templates are logically consistent (goal × difficulty × exercise selection)
 
 ### Phase 4: TypeScript Types
 

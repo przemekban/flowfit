@@ -29,3 +29,7 @@ pnpm-debug.log*
 
 
 .claude
+
+# scraper 
+scripts/
+exercises-raw.json

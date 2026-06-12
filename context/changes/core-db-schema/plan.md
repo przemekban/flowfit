@@ -460,9 +460,9 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Automated
 
-- [x] 4.1 `npm run lint` passes with zero errors
-- [x] 4.2 `astro sync` exits 0
+- [x] 4.1 `npm run lint` passes with zero errors — 80cf9a2
+- [x] 4.2 `astro sync` exits 0 — 80cf9a2
 
 #### Manual
 
-- [x] 4.3 Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields
+- [x] 4.3 Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields — 80cf9a2

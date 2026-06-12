@@ -1,9 +1,9 @@
 ---
 change_id: core-db-schema
 title: Core database schema
-status: implementing
+status: implemented
 created: 2026-05-29
-updated: 2026-06-10
+updated: 2026-06-12
 archived_at: null
 ---
 

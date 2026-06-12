@@ -12,7 +12,7 @@ No migrations exist today (`supabase/migrations/` is absent). The Supabase clien
 
 ## Desired End State
 
-`npx supabase db reset` applies a single migration cleanly, seeds ~72 exercises, and leaves all 9 tables with RLS active. `npm run lint` and `astro sync` pass. A developer can open Supabase Studio and confirm that an authenticated user can read exercises but cannot access another user's workouts.
+`npx supabase db reset` applies three migrations cleanly, seeds 820+ exercises (scraped from SmartWorkout in Polish) and 8 workout templates, and leaves all 9 tables with RLS active. `npm run lint` and `astro sync` pass with `src/types.ts` in place. A developer can open Supabase Studio and confirm that an authenticated user can read exercises but cannot access another user's workouts.
 
 ## Key Decisions Made
 
@@ -26,20 +26,20 @@ No migrations exist today (`supabase/migrations/` is absent). The Supabase clien
 | Workout rotation (plan) | Position-based `user_plan` table | Ordered rotation without calendar binding; "next suggested" = next position after last completed session |
 | `workout_sessions.workout_id` | NOT NULL | Every logged session must reference a source workout for history display |
 | Workout metadata | `name NOT NULL` + `description` nullable | AI generates the name; description is optional context |
-| System templates | `workout_templates` table created, not seeded | Architectural readiness for V2 template browser; seeding deferred |
+| System templates | `workout_templates` table created and seeded with 8 templates | Full matrix of goal × style × level; AI fallback still works when no template matches |
 
 ## Scope
 
 **In scope:**
-- 6 custom ENUMs
+- 7 custom ENUMs (including `tracking_type_enum` added in migration 3)
 - 9 tables: `user_profiles`, `exercises`, `workout_templates`, `workout_template_exercises`, `workouts`, `workout_exercises`, `user_plan`, `workout_sessions`, `workout_sets`
 - Per-operation RLS policies on all tables
 - 6 performance indexes (including the load-bearing `workout_sessions(user_id, completed_at)`)
-- Exercise seed data (~72 exercises, 8 muscle groups × 3 difficulty levels)
+- Exercise seed data (820+ exercises scraped from SmartWorkout in Polish, covering all 24 muscle_group × difficulty cells)
+- 8 workout template seeds covering the full goal × style × experience_level matrix
 - `src/types.ts` with entity interfaces and DTO types
 
 **Out of scope:**
-- `workout_templates` seed data (V2)
 - API routes and UI components (downstream slices)
 - Supabase generic type wiring in `src/lib/supabase.ts` (deferred to S-01)
 - `updated_at` triggers (application code sets this explicitly)
@@ -54,17 +54,18 @@ The data model separates **plan** (what the user intends to do) from **log** (wh
 
 | Phase | What it delivers | Key risk |
 |---|---|---|
-| 1. Database Migration | 9 tables + ENUMs + indexes + RLS all applied | Wrong FK structure or RLS gap cascades into every downstream slice |
-| 2. Exercise Seed Data | ~72 exercises covering all muscle group × difficulty cells | Thin coverage in a cell breaks AI matching for some user profiles |
-| 3. TypeScript Types | `src/types.ts` entity and DTO types | Type drift from migration if a column is renamed during Phase 1 |
+| 1. Database Migration | 9 tables + 6 ENUMs + indexes + RLS all applied | Wrong FK structure or RLS gap cascades into every downstream slice |
+| 2. Exercise Detail Fields | 6 nullable detail columns added to `exercises` (Polish content) | Column type mismatch with seed data in Phase 3 |
+| 3. Exercise Seed Data | 820+ exercises + `tracking_type_enum` migration + 8 workout templates | Thin coverage in a muscle_group × difficulty cell breaks AI matching |
+| 4. TypeScript Types | `src/types.ts` with 7 ENUM types, 9 entity interfaces, 2 DTO types | Type drift from migration if a column is renamed post-Phase 1 |
 
 **Prerequisites:** Local Supabase stack running (`npx supabase start`), Docker available  
-**Estimated effort:** ~1 session across 3 phases
+**Estimated effort:** ~2 sessions across 4 phases
 
 ## Open Risks & Assumptions
 
 - RLS subquery pattern on `workout_exercises` and `workout_sets` (ownership via parent table JOIN) adds per-row overhead — acceptable at MVP scale but worth monitoring as data grows
-- `equipment TEXT[]` on `user_profiles` is validated by the application, not a DB ENUM constraint — a bad value would only surface at query time when AI matching fails
+- `equipment TEXT[]` on `user_profiles` is enforced by a DB `CHECK (equipment <@ ARRAY['barbell',...]::text[])` constraint — application code must use the same vocabulary constants or writes will fail at the DB layer
 - `workout_templates` is intentionally empty after seed; if S-02 implementation assumes templates exist, it will need to generate workouts from scratch via AI only
 
 ## Success Criteria (Summary)

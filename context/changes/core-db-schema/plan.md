@@ -271,7 +271,30 @@ Full scraping strategy and Claude prompts are documented in `context/changes/cor
 
 ### Changes Required
 
-#### 1. Scraper script
+#### 1. Migration file
+
+**File**: `supabase/migrations/20260529000002_tracking_type.sql`
+
+**Intent**: Add `tracking_type_enum` and two `target_duration_seconds` columns so exercises and templates can express duration-based targets alongside rep-based ones.
+
+**Contract**:
+
+```sql
+CREATE TYPE tracking_type_enum AS ENUM ('reps', 'duration');
+
+ALTER TABLE exercises
+  ADD COLUMN tracking_type tracking_type_enum NOT NULL DEFAULT 'reps';
+
+ALTER TABLE workout_template_exercises
+  ADD COLUMN target_duration_seconds SMALLINT CHECK (target_duration_seconds > 0);
+
+ALTER TABLE workout_exercises
+  ADD COLUMN target_duration_seconds SMALLINT CHECK (target_duration_seconds > 0);
+```
+
+No new RLS policies needed — existing per-table policies cover all columns.
+
+#### 2. Scraper script
 
 **File**: `scripts/scrape-exercises.mjs`
 

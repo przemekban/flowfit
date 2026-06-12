@@ -180,13 +180,13 @@ ALTER TABLE workout_sets              ENABLE ROW LEVEL SECURITY;
 
 -- System tables: authenticated users can SELECT only
 CREATE POLICY "exercises_select" ON exercises
-  FOR SELECT USING (auth.role() = 'authenticated');
+  FOR SELECT USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "workout_templates_select" ON workout_templates
-  FOR SELECT USING (auth.role() = 'authenticated');
+  FOR SELECT USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "workout_template_exercises_select" ON workout_template_exercises
-  FOR SELECT USING (auth.role() = 'authenticated');
+  FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- user_profiles: owner only (no DELETE in MVP)
 CREATE POLICY "user_profiles_select" ON user_profiles

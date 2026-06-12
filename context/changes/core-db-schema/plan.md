@@ -2,7 +2,7 @@
 
 ## Overview
 
-Create the complete Supabase database foundation for FlowFit: 9 tables, 6 custom ENUMs, per-operation RLS policies, performance indexes, exercise library seed data, and hand-written TypeScript entity types. Every downstream slice (S-01 through S-05) blocks on this foundation — no application code can be written until these migrations apply cleanly.
+Create the complete Supabase database foundation for FlowFit: 9 tables, 7 custom ENUMs, per-operation RLS policies, performance indexes, exercise library seed data, and hand-written TypeScript entity types. Every downstream slice (S-01 through S-05) blocks on this foundation — no application code can be written until these migrations apply cleanly.
 
 ## Current State Analysis
 
@@ -14,7 +14,7 @@ Create the complete Supabase database foundation for FlowFit: 9 tables, 6 custom
 
 ## Desired End State
 
-After this plan completes, `npx supabase db reset` applies the migration cleanly, seeds ~72 exercises, and leaves all 9 tables with RLS active. `npm run lint` and `astro sync` pass with `src/types.ts` in place. A developer can verify the schema in Supabase Studio (`http://localhost:54323`) and confirm that an authenticated user can read exercises but cannot read another user's workouts.
+After this plan completes, `npx supabase db reset` applies all three migrations cleanly, seeds 823 exercises (814 scraped + 9 cardio), 8 workout templates, and leaves all 9 tables with RLS active. `npm run lint` and `astro sync` pass with `src/types.ts` in place. A developer can verify the schema in Supabase Studio (`http://localhost:54323`) and confirm that an authenticated user can read exercises but cannot read another user's workouts.
 
 ### Key Discoveries
 
@@ -27,7 +27,7 @@ After this plan completes, `npx supabase db reset` applies the migration cleanly
 ## What We're NOT Doing
 
 - Generating Supabase TypeScript types via CLI (`supabase gen types`) — hand-written types are the chosen approach
-- Creating `workout_templates` seed data — table is created for architectural readiness; seeding is V2 when the template browser UI is built
+- Creating additional workout templates beyond the 8 seeded in Phase 3 — V2 when the template browser UI is built
 - Creating API routes or UI components — schema only
 - Wiring the Supabase generic type parameter in `src/lib/supabase.ts` — deferred to S-01
 - Creating edge functions, triggers for `updated_at` auto-update — application code sets `updated_at` explicitly on writes
@@ -350,14 +350,15 @@ Write `src/types.ts` containing ENUM union types, entity interfaces matching the
 - `MuscleGroup = 'chest' | 'back' | 'shoulders' | 'arms' | 'core' | 'legs' | 'glutes' | 'cardio'`
 - `WorkoutStatus = 'active' | 'completed' | 'abandoned'`
 - `WorkoutSource = 'ai' | 'template' | 'custom'`
+- `TrackingType = 'reps' | 'duration'` — added in migration 3 (`tracking_type_enum`)
 
 **Entity interfaces** (field names = column names, types match DB types):
 - `UserProfile` — all columns of `user_profiles` (equipment as `string[]`)
-- `Exercise` — all columns of `exercises`; detail fields nullable: `description: string | null`, `instructions: string[] | null`, `muscles_primary: string[] | null`, `muscles_secondary: string[] | null`, `tips: string[] | null`, `common_mistakes: string[] | null`
+- `Exercise` — all columns of `exercises`; `tracking_type: TrackingType`; detail fields nullable: `description: string | null`, `instructions: string[] | null`, `muscles_primary: string[] | null`, `muscles_secondary: string[] | null`, `tips: string[] | null`, `common_mistakes: string[] | null`
 - `WorkoutTemplate` — all columns of `workout_templates`
-- `WorkoutTemplateExercise` — all columns of `workout_template_exercises`
+- `WorkoutTemplateExercise` — all columns of `workout_template_exercises`; `target_duration_seconds: number | null` (added in migration 3)
 - `Workout` — all columns of `workouts` (template_id as `string | null`)
-- `WorkoutExercise` — all columns of `workout_exercises`
+- `WorkoutExercise` — all columns of `workout_exercises`; `target_duration_seconds: number | null` (added in migration 3)
 - `UserPlanItem` — all columns of `user_plan`
 - `WorkoutSession` — all columns of `workout_sessions` (completed_at as `string | null`)
 - `WorkoutSet` — all columns of `workout_sets` (reps, weight_kg, duration_seconds, notes all nullable)
@@ -377,7 +378,7 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Manual Verification
 
-- Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields including the six detail columns
+- Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 13 fields including `tracking_type` and the six detail columns
 
 **Implementation Note**: After lint passes, the plan is complete.
 
@@ -398,7 +399,7 @@ No imports from external packages in this file — pure TypeScript type definiti
 ## Migration Notes
 
 - `supabase/migrations/` directory already created in Phase 1
-- Two migration files apply in filename order: `20260529000000_core_schema.sql` then `20260529000001_exercise_detail_fields.sql`
+- Three migration files apply in filename order: `20260529000000_core_schema.sql` → `20260529000001_exercise_detail_fields.sql` → `20260529000002_tracking_type.sql`
 - The seed file path `supabase/seed.sql` is already declared in `supabase/config.toml`
 - If local Supabase is not running: `npx supabase start` before `npx supabase db reset`
 - `exercises-raw.json` (scraper output) must be added to `.gitignore` before committing Phase 3
@@ -443,25 +444,25 @@ No imports from external packages in this file — pure TypeScript type definiti
 
 #### Automated
 
-- [x] 3.1 `npx supabase db reset` exits 0 with all seed blocks
-- [x] 3.2 `SELECT COUNT(*) FROM exercises` ≥ 820
-- [x] 3.3 Each of 24 muscle_group × difficulty cells has ≥ 3 rows
-- [x] 3.4 `SELECT COUNT(*) FROM workout_templates` = 8
-- [x] 3.5 Each template has 6–8 exercises in `workout_template_exercises`
+- [x] 3.1 `npx supabase db reset` exits 0 with all seed blocks — ca60fbf
+- [x] 3.2 `SELECT COUNT(*) FROM exercises` ≥ 820 — ca60fbf
+- [x] 3.3 Each of 24 muscle_group × difficulty cells has ≥ 3 rows — ca60fbf
+- [x] 3.4 `SELECT COUNT(*) FROM workout_templates` = 8 — ca60fbf
+- [x] 3.5 Each template has 6–8 exercises in `workout_template_exercises` — ca60fbf
 
 #### Manual
 
-- [x] 3.6 Polish exercise names, readable descriptions, detail columns populated in Studio
-- [x] 3.7 At least one `equipment = 'bodyweight'` exercise per muscle_group
-- [x] 3.8 Workout templates are logically consistent (goal × difficulty × exercise selection)
+- [x] 3.6 Polish exercise names, readable descriptions, detail columns populated in Studio — ca60fbf
+- [x] 3.7 At least one `equipment = 'bodyweight'` exercise per muscle_group — ca60fbf
+- [x] 3.8 Workout templates are logically consistent (goal × difficulty × exercise selection) — ca60fbf
 
 ### Phase 4: TypeScript Types
 
 #### Automated
 
-- [ ] 4.1 `npm run lint` passes with zero errors
-- [ ] 4.2 `astro sync` exits 0
+- [x] 4.1 `npm run lint` passes with zero errors
+- [x] 4.2 `astro sync` exits 0
 
 #### Manual
 
-- [ ] 4.3 Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields
+- [x] 4.3 Import `Exercise` in any `.ts` file and confirm IDE autocomplete shows all 12 fields

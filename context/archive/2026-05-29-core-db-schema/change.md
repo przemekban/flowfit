@@ -1,10 +1,10 @@
 ---
 change_id: core-db-schema
 title: Core database schema
-status: impl_reviewed
+status: archived
 created: 2026-05-29
-updated: 2026-06-12
-archived_at: null
+updated: 2026-06-13
+archived_at: 2026-06-13T00:00:00Z
 ---
 
 ## Notes

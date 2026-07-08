@@ -300,28 +300,28 @@ No new Supabase migration is required. `user_profiles`, its RLS policies, and it
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Build passes: `npm run build`
-- [x] 1.3 `zod` present in `package.json` and `package-lock.json`
+- [x] 1.1 Lint passes: `npm run lint` — b8ec3a7
+- [x] 1.2 Build passes: `npm run build` — b8ec3a7
+- [x] 1.3 `zod` present in `package.json` and `package-lock.json` — b8ec3a7
 
 #### Manual
 
-- [x] 1.4 `onboardingSchema.safeParse` accepts a valid payload
-- [x] 1.5 `onboardingSchema.safeParse` rejects out-of-vocabulary equipment and out-of-range sessions_per_week
+- [x] 1.4 `onboardingSchema.safeParse` accepts a valid payload — b8ec3a7
+- [x] 1.5 `onboardingSchema.safeParse` rejects out-of-vocabulary equipment and out-of-range sessions_per_week — b8ec3a7
 
 ### Phase 2: Middleware Gating & Auth Redirect Targets
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 Sign in with no profile → lands on `/onboarding`
-- [ ] 2.4 Sign in with existing profile → lands on `/dashboard`
-- [ ] 2.5 Direct `/dashboard` visit with no profile → redirected to `/onboarding`
-- [ ] 2.6 Direct `/onboarding` visit while signed out → redirected to `/auth/signin`
+- [x] 2.3 Sign in with no profile → lands on `/onboarding`
+- [x] 2.4 Sign in with existing profile → lands on `/dashboard`
+- [x] 2.5 Direct `/dashboard` visit with no profile → redirected to `/onboarding`
+- [x] 2.6 Direct `/onboarding` visit while signed out → redirected to `/auth/signin`
 
 ### Phase 3: Submit API Route
 

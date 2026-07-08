@@ -313,28 +313,28 @@ No new Supabase migration is required. `user_profiles`, its RLS policies, and it
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Build passes: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint` — 4bb0d46
+- [x] 2.2 Build passes: `npm run build` — 4bb0d46
 
 #### Manual
 
-- [x] 2.3 Sign in with no profile → lands on `/onboarding`
-- [x] 2.4 Sign in with existing profile → lands on `/dashboard`
-- [x] 2.5 Direct `/dashboard` visit with no profile → redirected to `/onboarding`
-- [x] 2.6 Direct `/onboarding` visit while signed out → redirected to `/auth/signin`
+- [x] 2.3 Sign in with no profile → lands on `/onboarding` — 4bb0d46
+- [x] 2.4 Sign in with existing profile → lands on `/dashboard` — 4bb0d46
+- [x] 2.5 Direct `/dashboard` visit with no profile → redirected to `/onboarding` — 4bb0d46
+- [x] 2.6 Direct `/onboarding` visit while signed out → redirected to `/auth/signin` — 4bb0d46
 
 ### Phase 3: Submit API Route
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 Missing-field POST → redirected to `/onboarding` with `error` param
-- [ ] 3.4 Valid POST → row created in `user_profiles`, redirected to `/dashboard?saved=1`
-- [ ] 3.5 Duplicate POST for existing profile → redirected to `/dashboard`, no duplicate row
+- [x] 3.3 Missing-field POST → redirected to `/onboarding` with `error` param
+- [x] 3.4 Valid POST → row created in `user_profiles`, redirected to `/dashboard?saved=1`
+- [x] 3.5 Duplicate POST for existing profile → redirected to `/dashboard`, no duplicate row
 
 ### Phase 4: Onboarding UI
 

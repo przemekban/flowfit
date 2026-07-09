@@ -1,10 +1,10 @@
 ---
 change_id: onboarding-survey
 title: Onboarding survey
-status: impl_reviewed
+status: archived
 created: 2026-07-08
 updated: 2026-07-09
-archived_at: null
+archived_at: 2026-07-09T16:59:08Z
 ---
 
 ## Notes

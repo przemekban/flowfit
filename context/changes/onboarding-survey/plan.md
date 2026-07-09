@@ -327,26 +327,26 @@ No new Supabase migration is required. `user_profiles`, its RLS policies, and it
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Build passes: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` — 2756261
+- [x] 3.2 Build passes: `npm run build` — 2756261
 
 #### Manual
 
-- [x] 3.3 Missing-field POST → redirected to `/onboarding` with `error` param
-- [x] 3.4 Valid POST → row created in `user_profiles`, redirected to `/dashboard?saved=1`
-- [x] 3.5 Duplicate POST for existing profile → redirected to `/dashboard`, no duplicate row
+- [x] 3.3 Missing-field POST → redirected to `/onboarding` with `error` param — 2756261
+- [x] 3.4 Valid POST → row created in `user_profiles`, redirected to `/dashboard?saved=1` — 2756261
+- [x] 3.5 Duplicate POST for existing profile → redirected to `/dashboard`, no duplicate row — 2756261
 
 ### Phase 4: Onboarding UI
 
 #### Automated
 
-- [ ] 4.1 Lint passes: `npm run lint`
-- [ ] 4.2 Build passes: `npm run build`
-- [ ] 4.3 `astro check` / `astro sync` passes
+- [x] 4.1 Lint passes: `npm run lint`
+- [x] 4.2 Build passes: `npm run build`
+- [x] 4.3 `astro check` / `astro sync` passes
 
 #### Manual
 
-- [ ] 4.4 Full walkthrough: signup → signin → onboarding → submit → dashboard confirmation → DB row verified
-- [ ] 4.5 Revisit `/onboarding` after completion shows read-only summary
-- [ ] 4.6 Mobile width: all controls usable without horizontal scrolling
-- [ ] 4.7 Keyboard-only pass reaches and toggles every control
+- [x] 4.4 Full walkthrough: signup → signin → onboarding → submit → dashboard confirmation → DB row verified
+- [x] 4.5 Revisit `/onboarding` after completion shows read-only summary
+- [x] 4.6 Mobile width: all controls usable without horizontal scrolling
+- [x] 4.7 Keyboard-only pass reaches and toggles every control

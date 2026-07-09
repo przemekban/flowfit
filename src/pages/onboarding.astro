@@ -1,0 +1,28 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import OnboardingForm from "@/components/onboarding/OnboardingForm";
+import { ProfileSummary } from "@/components/onboarding/ProfileSummary";
+import { createClient } from "@/lib/supabase";
+import { getUserProfile } from "@/lib/services/profile";
+
+// No auth/supabase-null guards here: middleware already protects /onboarding
+// (redirects unauthenticated or misconfigured-Supabase requests before this
+// frontmatter runs), so `user` and `supabase` are guaranteed here.
+const { user } = Astro.locals;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+const profile = user && supabase ? await getUserProfile(supabase, user.id) : null;
+const error = Astro.url.searchParams.get("error");
+---
+
+<Layout title="Onboarding">
+  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-2xl border border-white/10 bg-white/10 p-8 text-white backdrop-blur-xl">
+      <h1
+        class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-center text-2xl font-bold text-transparent"
+      >
+        {profile ? "Your training profile" : "Tell us about your training"}
+      </h1>
+      {profile ? <ProfileSummary profile={profile} client:load /> : <OnboardingForm serverError={error} client:load />}
+    </div>
+  </div>
+</Layout>

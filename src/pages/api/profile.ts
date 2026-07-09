@@ -4,6 +4,10 @@ import { createClient } from "@/lib/supabase";
 import { onboardingSchema } from "@/lib/validation/profile";
 import { createUserProfile } from "@/lib/services/profile";
 
+function isPostgrestError(err: unknown): err is PostgrestError {
+  return typeof err === "object" && err !== null && "code" in err;
+}
+
 export const prerender = false;
 
 export const POST: APIRoute = async (context) => {
@@ -16,7 +20,13 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
   }
 
-  const form = await context.request.formData();
+  let form: FormData;
+  try {
+    form = await context.request.formData();
+  } catch {
+    return context.redirect(`/onboarding?error=${encodeURIComponent("Invalid submission")}`);
+  }
+
   const payload = {
     training_goal: form.get("training_goal"),
     experience_level: form.get("experience_level"),
@@ -34,7 +44,8 @@ export const POST: APIRoute = async (context) => {
   try {
     await createUserProfile(supabase, context.locals.user.id, result.data);
   } catch (err) {
-    if ((err as PostgrestError).code === "23505") {
+    if (isPostgrestError(err) && err.code === "23505") {
+      console.error("Duplicate profile submission", { userId: context.locals.user.id });
       return context.redirect("/dashboard");
     }
     const message = err instanceof Error ? err.message : "Failed to save profile";

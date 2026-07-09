@@ -5,12 +5,17 @@ import { ProfileSummary } from "@/components/onboarding/ProfileSummary";
 import { createClient } from "@/lib/supabase";
 import { getUserProfile } from "@/lib/services/profile";
 
-// No auth/supabase-null guards here: middleware already protects /onboarding
-// (redirects unauthenticated or misconfigured-Supabase requests before this
-// frontmatter runs), so `user` and `supabase` are guaranteed here.
 const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect(`/auth/signin?error=${encodeURIComponent("Please sign in")}`);
+}
+
 const supabase = createClient(Astro.request.headers, Astro.cookies);
-const profile = user && supabase ? await getUserProfile(supabase, user.id) : null;
+if (!supabase) {
+  return Astro.redirect(`/auth/signin?error=${encodeURIComponent("Supabase is not configured")}`);
+}
+
+const profile = await getUserProfile(supabase, user.id);
 const error = Astro.url.searchParams.get("error");
 ---
 

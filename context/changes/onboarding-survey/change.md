@@ -1,9 +1,9 @@
 ---
 change_id: onboarding-survey
 title: Onboarding survey
-status: implementing
+status: implemented
 created: 2026-07-08
-updated: 2026-07-08
+updated: 2026-07-09
 archived_at: null
 ---
 

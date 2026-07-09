@@ -340,13 +340,13 @@ No new Supabase migration is required. `user_profiles`, its RLS policies, and it
 
 #### Automated
 
-- [x] 4.1 Lint passes: `npm run lint`
-- [x] 4.2 Build passes: `npm run build`
-- [x] 4.3 `astro check` / `astro sync` passes
+- [x] 4.1 Lint passes: `npm run lint` — 9b0eb0b
+- [x] 4.2 Build passes: `npm run build` — 9b0eb0b
+- [x] 4.3 `astro check` / `astro sync` passes — 9b0eb0b
 
 #### Manual
 
-- [x] 4.4 Full walkthrough: signup → signin → onboarding → submit → dashboard confirmation → DB row verified
-- [x] 4.5 Revisit `/onboarding` after completion shows read-only summary
-- [x] 4.6 Mobile width: all controls usable without horizontal scrolling
-- [x] 4.7 Keyboard-only pass reaches and toggles every control
+- [x] 4.4 Full walkthrough: signup → signin → onboarding → submit → dashboard confirmation → DB row verified — 9b0eb0b
+- [x] 4.5 Revisit `/onboarding` after completion shows read-only summary — 9b0eb0b
+- [x] 4.6 Mobile width: all controls usable without horizontal scrolling — 9b0eb0b
+- [x] 4.7 Keyboard-only pass reaches and toggles every control — 9b0eb0b

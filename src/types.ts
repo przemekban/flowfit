@@ -119,6 +119,8 @@ export type WorkoutWithExercises = Workout & {
   exercises: (WorkoutExercise & { exercise: Exercise })[];
 };
 
+export type ActivePlanWorkout = WorkoutWithExercises & { position: number };
+
 export type WorkoutSessionWithSets = WorkoutSession & {
   workout: Workout;
   sets: (WorkoutSet & { exercise: Exercise })[];

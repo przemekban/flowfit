@@ -1,13 +1,22 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import { getActivePlan } from "@/lib/services/plan";
+import PlanGenerator from "@/components/plan/PlanGenerator";
+import PlanDisplay from "@/components/plan/PlanDisplay.astro";
 
 const { user } = Astro.locals;
 const saved = Astro.url.searchParams.get("saved") === "1";
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+const activePlan = supabase && user ? await getActivePlan(supabase, user.id) : [];
 ---
 
 <Layout title="Dashboard">
-  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
-    <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
+  <div class="bg-cosmic flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+    <div
+      class="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl"
+    >
       <h1 class="mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
         Dashboard
       </h1>
@@ -31,5 +40,15 @@ const saved = Astro.url.searchParams.get("saved") === "1";
         </button>
       </form>
     </div>
+
+    {
+      activePlan.length === 0 ? (
+        <PlanGenerator client:load />
+      ) : (
+        <div class="w-full max-w-2xl">
+          <PlanDisplay workouts={activePlan} />
+        </div>
+      )
+    }
   </div>
 </Layout>

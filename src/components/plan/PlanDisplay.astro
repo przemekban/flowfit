@@ -1,0 +1,36 @@
+---
+import type { ActivePlanWorkout } from "@/types";
+
+interface Props {
+  workouts: ActivePlanWorkout[];
+}
+
+const { workouts } = Astro.props;
+---
+
+<div class="w-full space-y-6">
+  {
+    workouts.map((workout) => (
+      <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-left backdrop-blur-xl">
+        <h2 class="text-xl font-semibold text-white">Workout {workout.position}</h2>
+        <p class="mt-1 text-sm font-medium text-blue-100">{workout.name}</p>
+        {workout.description && <p class="mt-1 text-sm text-blue-100/60">{workout.description}</p>}
+
+        <ul class="mt-4 space-y-2">
+          {workout.exercises
+            .slice()
+            .sort((a, b) => a.position - b.position)
+            .map((we) => (
+              <li class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-blue-100/90">
+                <span>{we.exercise.name}</span>
+                <span class="text-blue-100/60">
+                  {we.target_sets} sets ×{" "}
+                  {we.target_duration_seconds != null ? `${we.target_duration_seconds}s` : `${we.target_reps} reps`}
+                </span>
+              </li>
+            ))}
+        </ul>
+      </div>
+    ))
+  }
+</div>

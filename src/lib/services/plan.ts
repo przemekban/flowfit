@@ -1,7 +1,7 @@
 import type { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import type { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
-import type { Exercise, UserProfile } from "@/types";
+import type { ActivePlanWorkout, Exercise, UserProfile, Workout, WorkoutExercise } from "@/types";
 import {
   buildPlanSchema,
   buildPlanGenerationSchema,
@@ -166,4 +166,45 @@ export function validatePlanAgainstCandidates(plan: PlanOutput, candidates: Cand
   }
 
   return plan;
+}
+
+interface ActivePlanRow {
+  position: number;
+  workouts: Workout & {
+    workout_exercises: (WorkoutExercise & { exercises: Exercise })[];
+  };
+}
+
+export async function getActivePlan(supabase: SupabaseClient, userId: string): Promise<ActivePlanWorkout[]> {
+  const { data, error } = (await supabase
+    .from("user_plan")
+    .select(
+      `
+      position,
+      workouts!inner (
+        id, user_id, name, description, source, template_id, is_archived, created_at, updated_at,
+        workout_exercises (
+          id, workout_id, exercise_id, position, target_sets, target_reps, target_duration_seconds,
+          exercises ( * )
+        )
+      )
+    `,
+    )
+    .eq("user_id", userId)
+    .eq("workouts.is_archived", false)
+    .order("position", { ascending: true })
+    .order("position", { referencedTable: "workouts.workout_exercises", ascending: true })) as {
+    data: ActivePlanRow[] | null;
+    error: PostgrestError | null;
+  };
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map((row) => ({
+    ...row.workouts,
+    position: row.position,
+    exercises: row.workouts.workout_exercises.map((we) => ({ ...we, exercise: we.exercises })),
+  }));
 }

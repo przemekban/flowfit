@@ -3,7 +3,7 @@ project: FlowFit
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-09
+updated: 2026-07-10
 prd_version: 1
 main_goal: speed
 top_blocker: capacity
@@ -93,8 +93,9 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Which AI provider: Anthropic SDK directly vs OpenRouter? (`tech-stack.md` lists both as candidates; integration approach, model selection, pricing, and streaming support differ between them.) — Owner: team. Block: yes.
+  - ~~Which AI provider: Anthropic SDK directly vs OpenRouter?~~ Resolved (ORQ-2): originally Anthropic, reversed 2026-07-10 to Google Gemini (free tier) — see `tech-stack.md` ORQ-2 revision history.
 - **Risk:** the AI call is the highest-risk technical component — latency may exceed 2s (NFR requires continuous visible progress feedback), the response must be parsed into structured plan data, and Cloudflare Workers' free-tier 10ms CPU ceiling may trigger a silent 1101 error if Zod validation and SSR rendering run in the same isolate; see `infrastructure.md` risk register for mitigations.
+- **Known limitation (found during implementation, 2026-07-10):** if a user's onboarding equipment/experience selection is too narrow to yield the minimum 4 exercises the plan generator needs (e.g. selecting only `resistance_band`), generation fails with a clear error — but the only recovery offered is the generator's "Try again" retry button, which will fail identically every time since nothing about the request changes. There is no in-MVP way for the user to go back and broaden their equipment selection (see OQ-001 — no profile editing/retake in MVP). Deferred; needs a decision (e.g. surface a more specific "not enough exercises for your equipment" message with a link back to onboarding, or a minimal retake-survey affordance) before this can bite a real user. See `context/changes/ai-plan-generation/plan.md` (Progress 3.4) and `context/changes/ai-plan-generation/research.md` (Follow-up Research) for the discovery.
 - **Status:** blocked
 
 ### S-03: Workout session logging
@@ -147,8 +148,9 @@ Foundations below assume these are present and do NOT re-scaffold them.
 ## Open Roadmap Questions
 
 1. **OQ-001 — Profile update mechanism:** If a user's training goal or available equipment changes after the onboarding survey, the current plan becomes outdated. A minimal "reset profile and retake survey" option may be needed before the product is viable for users beyond the initial developer-test phase. Owner: product. Block: no (does not gate any roadmap item for MVP; affects post-launch viability for external users).
+   - **Concrete failure mode found in S-02 (2026-07-10):** a too-narrow equipment/experience selection can leave too few candidate exercises to ever generate a plan (verified: `resistance_band`-only equipment matches just 1 exercise in the seeded catalog). Today the user is stuck with a "Try again" button that will always fail the same way — this is the sharpest concrete case for why OQ-001 matters, not just a hypothetical. See S-02's "Known limitation" note above.
 
-2. **ORQ-2 — AI provider choice:** `tech-stack.md` lists both Anthropic SDK directly and OpenRouter as candidates for FR-006. The integration approach differs across model selection, pricing, streaming support, and error handling. Owner: team. Block: S-02.
+2. ~~**ORQ-2 — AI provider choice**~~ Resolved: originally Anthropic SDK direct, reversed same-day (2026-07-10) to Google Gemini (free tier) — Anthropic's API is not free and the project needs a $0 provider. See `tech-stack.md` ORQ-2 revision history.
 
 ## Parked
 

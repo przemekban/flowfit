@@ -5,11 +5,11 @@ git_commit: e443c42528ab9607fcc890a1ef46050f10f7ef54
 branch: main
 repository: przemekban/flowfit
 topic: "AI-generated weekly training plan and plan display screen"
-tags: [research, codebase, plan-generation, anthropic-sdk, supabase, rls]
+tags: [research, codebase, plan-generation, gemini-sdk, supabase, rls]
 status: complete
 last_updated: 2026-07-10
-last_updated_by: Antigravity
-last_updated_note: "Clarified workout archival vs deletion logic"
+last_updated_by: Claude
+last_updated_note: "Documented ORQ-2 provider pivot (Anthropic → Gemini) and the index-based candidate-mapping workaround for Gemini's structured-output limitation"
 ---
 
 # Research: AI-generated weekly training plan and plan display screen
@@ -117,3 +117,33 @@ During follow-up, the user raised a concern about whether old workouts should be
 
 - ** workouts Table (`workouts`)**: The old workouts will have `is_archived` updated to `true`. They remain in the database so that past sessions in `workout_sessions` (which reference `workout_id`) remain valid and can be queried in the history tab.
 - ** rotation Table (`user_plan`)**: The only table that undergoes deletions is `user_plan`, which serves as a junction table pointing to the user's currently *active* workout rotation. Deleting rotation entries here does not delete the workouts themselves, only their ordering in the active list.
+
+---
+
+## Follow-up Research [2026-07-10, same day]
+
+### Provider pivot: Anthropic → Google Gemini (ORQ-2 reopened)
+
+During implementation, the user discovered the Anthropic API is not free and required a $0 AI provider. Evaluated four free options: Google Gemini (free tier), OpenRouter free models, Groq free tier, and Cloudflare Workers AI. Chose **Google Gemini** for its genuinely free tier (not just trial credits), generous rate limits, and strong `responseJsonSchema` structured-output enforcement. See `context/foundation/tech-stack.md` (ORQ-2 revision history) for the full comparison and rationale.
+
+Implementation swap: `@anthropic-ai/sdk` → `@google/genai`; `client.messages.parse()` + `zodOutputFormat` → `client.models.generateContent()` with `config.responseJsonSchema` built from the Zod schema via `z.toJSONSchema()` (Zod 4's built-in JSON Schema export — no extra dependency needed). `ANTHROPIC_API_KEY` renamed to `GEMINI_API_KEY` throughout (`astro.config.mjs`, `.env.example`, `.dev.vars`).
+
+### Gemini structured-output limitation: large enum/uuid nested in a repeated array item
+
+Empirically verified during manual testing: Gemini's `responseJsonSchema` enforcement breaks down when a large string enum (or a uuid-typed field meant to be constrained to a large candidate set) is nested inside a repeated array item — small/flat cases work, large nested cases fail. This ruled out asking the model for `exercise_id` (uuid) directly per exercise, which the original (Anthropic-based) schema did.
+
+**Workaround**: the candidate exercise list is sent to the model as compact pipe-delimited lines (`id|name|muscle_group|tracking_type`, where `id` is the candidate's array index, not a UUID). The generation-time Zod schema (`buildPlanGenerationSchema`) asks for a small-range numeric `id` (`0..candidates.length-1`) instead of a uuid. After parsing, the service maps each returned index back to the real `exercise_id` UUID via `candidates[id].id`, then re-validates the mapped plan against the original uuid-based schema (`buildPlanSchema`) before it's handed to the persistence RPC — so the two-pass referential-integrity check (candidate-set membership + tracking-type match) still runs against real UUIDs, unchanged.
+
+Model settled on `gemini-3.1-flash-lite` after testing (fastest/most budget-friendly of the current Gemini Flash family, sufficient instruction-following for this schema-bound generation task).
+
+### Manual-test defect: narrow candidate pool produces a repeated-exercise plan instead of a clean failure
+
+During manual verification of "3.4 — deliberately empty/unrealistic candidate set fails validation cleanly", a profile with `equipment: [resistance_band]` only (which matches exactly 1 exercise in the seeded catalog — verified via `select equipment, difficulty, count(*) from exercises group by 1,2`) did **not** fail. Instead, the generated plan repeated that single exercise 4+ times per workout to satisfy the schema's `exercises.min(4)` array-length constraint — schema-valid (the index-range and array-length constraints were technically satisfied) and passed the original referential-integrity check (every index did resolve to a real candidate), but semantically nonsensical.
+
+**Root cause**: `min(MIN_EXERCISES_PER_WORKOUT)` on the `exercises` array bounds *count*, not *distinctness*. With a candidate pool smaller than (or barely at) that minimum, Gemini has no way to satisfy the count constraint other than repeating candidates — and nothing in the original validation forbade repeats within a workout.
+
+**Fix** (`src/lib/services/plan.ts`):
+1. `generateTrainingPlan` now guards `candidates.length < MIN_EXERCISES_PER_WORKOUT` up front and throws a `PlanValidationError` with a user-facing, actionable message — before the model is ever called, so a hopeless combination doesn't burn a free-tier API call.
+2. `validatePlanAgainstCandidates` now also rejects a workout containing the same `exercise_id` more than once, catching the same failure mode for candidate pools that clear the size-4 floor but are still tight enough (4-7 candidates) that repetition could otherwise slip through.
+
+`MIN_EXERCISES_PER_WORKOUT`/`MAX_EXERCISES_PER_WORKOUT` were extracted as exported constants in `src/lib/validation/plan.ts` so the service's preflight check and the schema bound can't drift apart.

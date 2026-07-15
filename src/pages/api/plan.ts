@@ -40,8 +40,10 @@ export const POST: APIRoute = async (context) => {
     const plan = await generateTrainingPlan(gemini, profile, candidates);
     planPayload = validatePlanAgainstCandidates(plan, candidates);
   } catch (err) {
-    const message = err instanceof PlanValidationError ? err.message : "Failed to generate training plan";
-    console.error("Plan generation failed", { userId, cause: err });
+    const isValidationFailure = err instanceof PlanValidationError;
+    const message = isValidationFailure ? err.message : "Failed to generate training plan";
+    const kind = isValidationFailure ? "validation" : "gemini_call";
+    console.error("Plan generation failed", { userId, kind, cause: err });
     return Response.json({ error: "ai_error", message }, { status: 502 });
   }
 

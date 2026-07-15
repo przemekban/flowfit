@@ -10,7 +10,7 @@ export default function PlanGenerator() {
   const [messageIndex, setMessageIndex] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const hasFiredRef = useRef(false);
-  const cancelledRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const intervalIdRef = useRef<number | null>(null);
 
   const startMessageCycle = useCallback(() => {
@@ -33,10 +33,11 @@ export default function PlanGenerator() {
     setMessageIndex(0);
     startMessageCycle();
 
-    fetch("/api/plan", { method: "POST" })
-      .then(async (response) => {
-        if (cancelledRef.current) return;
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
+    fetch("/api/plan", { method: "POST", signal: controller.signal })
+      .then(async (response) => {
         if (!response.ok) {
           const body = (await response.json().catch(() => null)) as { message?: string } | null;
           stopMessageCycle();
@@ -47,8 +48,8 @@ export default function PlanGenerator() {
 
         window.location.reload();
       })
-      .catch(() => {
-        if (cancelledRef.current) return;
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         stopMessageCycle();
         setErrorMessage("Something went wrong while generating your plan.");
         setStatus("error");
@@ -59,7 +60,7 @@ export default function PlanGenerator() {
     fireGeneration();
 
     return () => {
-      cancelledRef.current = true;
+      abortControllerRef.current?.abort();
       stopMessageCycle();
     };
   }, [fireGeneration, stopMessageCycle]);

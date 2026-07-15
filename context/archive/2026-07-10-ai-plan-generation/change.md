@@ -1,10 +1,10 @@
 ---
 change_id: ai-plan-generation
 title: AI-generated weekly training plan and plan display screen
-status: impl_reviewed
+status: archived
 created: 2026-07-10
-updated: 2026-07-14
-archived_at: null
+updated: 2026-07-15
+archived_at: 2026-07-15T15:14:40Z
 ---
 
 ## Notes

@@ -137,8 +137,9 @@ The root failure: the team assumed "it works in local workerd" meant "it works i
    ```bash
    npx wrangler secret put SUPABASE_URL
    npx wrangler secret put SUPABASE_KEY
+   npx wrangler secret put GEMINI_API_KEY
    ```
-   Enter values interactively when prompted. These are injected into the Worker at request time; they do not appear in `wrangler.jsonc`.
+   Enter values interactively when prompted. These are injected into the Worker at request time; they do not appear in `wrangler.jsonc`. `GEMINI_API_KEY` (added 2026-07-15, for the `ai-plan-generation` feature) is optional at build time — the app degrades to a clean `502` if unset — but is required for `/api/plan` to actually generate plans in production. Verify what's currently set with `npx wrangler secret list` (names only, no values).
 
 4. **Deploy to production:**
    ```bash

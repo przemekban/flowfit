@@ -438,8 +438,8 @@ No existing production data is affected — this is a new RPC and new API surfac
 
 #### Manual
 
-- [ ] 1.5 `GEMINI_API_KEY` added to local `.dev.vars` and Cloudflare production secret via `wrangler secret put` (local `.dev.vars` confirmed done; production `wrangler secret put` still pending before this ships)
-- [ ] 1.6 `GEMINI_API_KEY` added as a GitHub Actions secret if a future build step requires it
+- [x] 1.5 `GEMINI_API_KEY` added to local `.dev.vars` and Cloudflare production secret via `wrangler secret put` (production secret confirmed present via `npx wrangler secret list` — 2026-07-15)
+- [x] 1.6 `GEMINI_API_KEY` added as a GitHub Actions secret if a future build step requires it (not needed — current CI build step doesn't require it; skipped by user decision, 2026-07-15)
 
 ### Phase 2: Database — Transactional Save RPC
 

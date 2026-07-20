@@ -38,3 +38,11 @@ export async function createUserProfile(
 
   return data;
 }
+
+export async function deleteUserProfile(supabase: SupabaseClient, userId: string): Promise<void> {
+  const { error } = await supabase.from("user_profiles").delete().eq("id", userId);
+
+  if (error) {
+    throw error;
+  }
+}

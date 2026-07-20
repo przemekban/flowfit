@@ -220,9 +220,9 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase db reset`
-- [x] 1.2 Grant is present in `information_schema.role_table_grants`
-- [x] 1.3 Lint passes: `npm run lint`
+- [x] 1.1 Migration applies cleanly: `npx supabase db reset` — 2144277
+- [x] 1.2 Grant is present in `information_schema.role_table_grants` — 2144277
+- [x] 1.3 Lint passes: `npm run lint` — 2144277
 
 #### Manual
 
@@ -232,9 +232,9 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Automated
 
-- [ ] 2.1 Type checking passes (`npm run build`)
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Build succeeds: `npm run build`
+- [x] 2.1 Type checking passes (`npm run build`)
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Build succeeds: `npm run build`
 
 #### Manual
 

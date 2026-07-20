@@ -455,9 +455,9 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly
-- [x] 1.2 Table grants still cover workout_sets/workout_sessions for authenticated
-- [x] 1.3 npm run build still passes
+- [x] 1.1 Migration applies cleanly — 93299e6
+- [x] 1.2 Table grants still cover workout_sets/workout_sessions for authenticated — 93299e6
+- [x] 1.3 npm run build still passes — 93299e6
 
 #### Manual
 
@@ -468,8 +468,8 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Automated
 
-- [ ] 2.1 Type checking passes
-- [ ] 2.2 Linting passes
+- [x] 2.1 Type checking passes
+- [x] 2.2 Linting passes
 
 ### Phase 3: Vitest Setup & Unit Tests
 

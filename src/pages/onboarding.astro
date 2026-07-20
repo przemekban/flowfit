@@ -27,7 +27,13 @@ const error = Astro.url.searchParams.get("error");
       >
         {profile ? "Your training profile" : "Tell us about your training"}
       </h1>
-      {profile ? <ProfileSummary profile={profile} client:load /> : <OnboardingForm serverError={error} client:load />}
+      {
+        profile ? (
+          <ProfileSummary profile={profile} error={error} client:load />
+        ) : (
+          <OnboardingForm serverError={error} client:load />
+        )
+      }
     </div>
   </div>
 </Layout>

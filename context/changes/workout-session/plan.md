@@ -468,16 +468,16 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Automated
 
-- [x] 2.1 Type checking passes
-- [x] 2.2 Linting passes
+- [x] 2.1 Type checking passes — 93c70c5
+- [x] 2.2 Linting passes — 93c70c5
 
 ### Phase 3: Vitest Setup & Unit Tests
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass
-- [ ] 3.2 Linting passes
-- [ ] 3.3 Type checking passes
+- [x] 3.1 Unit tests pass
+- [x] 3.2 Linting passes
+- [x] 3.3 Type checking passes
 
 ### Phase 4: API Routes
 

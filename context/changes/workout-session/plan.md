@@ -475,9 +475,9 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Automated
 
-- [x] 3.1 Unit tests pass
-- [x] 3.2 Linting passes
-- [x] 3.3 Type checking passes
+- [x] 3.1 Unit tests pass — 00ede65
+- [x] 3.2 Linting passes — 00ede65
+- [x] 3.3 Type checking passes — 00ede65
 
 ### Phase 4: API Routes
 

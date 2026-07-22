@@ -332,10 +332,10 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Automated
 
-- [x] 4.1 Migration applies cleanly: `npx supabase migration up`
-- [x] 4.2 `reset_user_profile` function present, granted to `authenticated` — verified via `\df reset_user_profile` against local DB
-- [x] 4.3 Lint passes: `npm run lint`
-- [x] 4.4 Build succeeds: `npm run build`
+- [x] 4.1 Migration applies cleanly: `npx supabase migration up` — 57124f9
+- [x] 4.2 `reset_user_profile` function present, granted to `authenticated` — verified via `\df reset_user_profile` against local DB — 57124f9
+- [x] 4.3 Lint passes: `npm run lint` — 57124f9
+- [x] 4.4 Build succeeds: `npm run build` — 57124f9
 
 #### Manual
 

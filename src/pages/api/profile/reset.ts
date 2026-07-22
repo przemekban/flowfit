@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
-import { deleteUserProfile } from "@/lib/services/profile";
+import { resetUserProfile } from "@/lib/services/profile";
 import { hasActiveWorkoutSession } from "@/lib/services/workout-sessions";
 
 export const prerender = false;
@@ -24,7 +24,7 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
-    await deleteUserProfile(supabase, userId);
+    await resetUserProfile(supabase, userId);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to reset profile";
     return context.redirect(`/onboarding?error=${encodeURIComponent(message)}`);

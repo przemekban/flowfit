@@ -39,8 +39,8 @@ export async function createUserProfile(
   return data;
 }
 
-export async function deleteUserProfile(supabase: SupabaseClient, userId: string): Promise<void> {
-  const { error } = await supabase.from("user_profiles").delete().eq("id", userId);
+export async function resetUserProfile(supabase: SupabaseClient, userId: string): Promise<void> {
+  const { error } = await supabase.rpc("reset_user_profile", { p_user_id: userId });
 
   if (error) {
     throw error;

@@ -67,6 +67,9 @@ const handleSetWrite: APIRoute = async (context) => {
   if (!session) {
     return Response.json({ error: "not_found" }, { status: 404 });
   }
+  if (session.status !== "active") {
+    return Response.json({ error: "conflict", message: "Session is not active" }, { status: 409 });
+  }
 
   let body: unknown;
   try {
@@ -132,6 +135,9 @@ export const DELETE: APIRoute = async (context) => {
   }
   if (!session) {
     return Response.json({ error: "not_found" }, { status: 404 });
+  }
+  if (session.status !== "active") {
+    return Response.json({ error: "conflict", message: "Session is not active" }, { status: 409 });
   }
 
   let body: unknown;

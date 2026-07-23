@@ -503,10 +503,10 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [ ] 5.3 First launch lands directly in logging UI (zero intermediate screens)
-- [ ] 5.4 Second visit to an active session shows resume/restart modal
-- [ ] 5.5 Signed-out access to /session/* redirects to signin
-- [ ] 5.6 Cross-user workout id access rejected
+- [x] 5.3 First launch lands directly in logging UI (zero intermediate screens)
+- [x] 5.4 Second visit to an active session shows resume/restart modal
+- [x] 5.5 Signed-out access to /session/* redirects to signin
+- [x] 5.6 Cross-user workout id access rejected
 
 ### Phase 6: React Islands
 
@@ -518,11 +518,11 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [ ] 6.4 Logged set persists after reload (real autosave, not local state)
-- [ ] 6.5 Editing a logged set upserts rather than duplicating
-- [ ] 6.6 Fresh exercise starts blank; previously-logged exercise pre-fills
-- [ ] 6.7 Offline save failure shows banner only after all 3 retries exhausted, input values preserved
-- [ ] 6.8 Clearing a saved field deletes the persisted row; clearing a never-saved field makes no API call
+- [x] 6.4 Logged set persists after reload (real autosave, not local state)
+- [x] 6.5 Editing a logged set upserts rather than duplicating
+- [x] 6.6 Fresh exercise starts blank; previously-logged exercise pre-fills
+- [x] 6.7 Offline save failure shows banner only after all 3 retries exhausted, input values preserved
+- [x] 6.8 Clearing a saved field deletes the persisted row; clearing a never-saved field makes no API call
 - [ ] 6.9 Native "leave site?" prompt appears when navigating away with a pending debounced save
 - [ ] 6.10 Finish with zero sets logged succeeds and redirects
 - [ ] 6.11 Full dashboard-to-first-input path confirmed at most two taps

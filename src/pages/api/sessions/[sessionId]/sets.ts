@@ -1,0 +1,156 @@
+import type { APIRoute } from "astro";
+import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase";
+import { buildSetLogSchema } from "@/lib/validation/session";
+import { getSessionWithSets, getWorkoutWithExercises, upsertSet, deleteSet } from "@/lib/services/session";
+import type { WorkoutSessionWithSets } from "@/types";
+
+export const prerender = false;
+
+const identifyingFieldsSchema = z.object({
+  exercise_id: z.uuid(),
+  set_number: z.number().int().positive(),
+});
+
+function isPostgrestError(err: unknown): err is PostgrestError {
+  return typeof err === "object" && err !== null && "code" in err;
+}
+
+async function loadOwnedSession(
+  supabase: SupabaseClient,
+  sessionId: string,
+  userId: string,
+): Promise<WorkoutSessionWithSets | null> {
+  try {
+    const session = await getSessionWithSets(supabase, sessionId);
+    return session.user_id === userId ? session : null;
+  } catch (err) {
+    if (isPostgrestError(err) && err.code === "PGRST116") {
+      return null;
+    }
+    throw err;
+  }
+}
+
+function extractExerciseId(body: unknown): string | null {
+  if (typeof body !== "object" || body === null) {
+    return null;
+  }
+  const value = (body as Record<string, unknown>).exercise_id;
+  return typeof value === "string" ? value : null;
+}
+
+const handleSetWrite: APIRoute = async (context) => {
+  if (!context.locals.user) {
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const userId = context.locals.user.id;
+
+  const sessionId = context.params.sessionId;
+  if (!sessionId) {
+    return Response.json({ error: "not_found" }, { status: 404 });
+  }
+
+  const supabase = createClient(context.request.headers, context.cookies);
+  if (!supabase) {
+    return Response.json({ error: "db_error", message: "Supabase is not configured" }, { status: 500 });
+  }
+
+  let session: WorkoutSessionWithSets | null;
+  try {
+    session = await loadOwnedSession(supabase, sessionId, userId);
+  } catch (err) {
+    console.error("Failed to load session", { userId, sessionId, cause: err });
+    return Response.json({ error: "db_error" }, { status: 500 });
+  }
+  if (!session) {
+    return Response.json({ error: "not_found" }, { status: 404 });
+  }
+
+  let body: unknown;
+  try {
+    body = await context.request.json();
+  } catch {
+    return Response.json({ error: "invalid_json" }, { status: 400 });
+  }
+
+  const exerciseId = extractExerciseId(body);
+  if (!exerciseId) {
+    return Response.json({ error: "validation_error", message: "exercise_id is required" }, { status: 400 });
+  }
+
+  const workout = await getWorkoutWithExercises(supabase, userId, session.workout_id);
+  const match = workout?.exercises.find((we) => we.exercise_id === exerciseId);
+  if (!match) {
+    return Response.json(
+      { error: "validation_error", message: "exercise_id is not part of this workout" },
+      { status: 400 },
+    );
+  }
+
+  const schema = buildSetLogSchema(match.exercise.tracking_type);
+  const result = schema.safeParse(body);
+  if (!result.success) {
+    return Response.json({ error: "validation_error", issues: result.error.issues }, { status: 400 });
+  }
+
+  try {
+    const savedSet = await upsertSet(supabase, sessionId, result.data);
+    return Response.json(savedSet, { status: 200 });
+  } catch (err) {
+    console.error("Failed to save set", { userId, sessionId, cause: err });
+    return Response.json({ error: "db_error" }, { status: 500 });
+  }
+};
+
+export const PUT = handleSetWrite;
+export const POST = handleSetWrite;
+
+export const DELETE: APIRoute = async (context) => {
+  if (!context.locals.user) {
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const userId = context.locals.user.id;
+
+  const sessionId = context.params.sessionId;
+  if (!sessionId) {
+    return Response.json({ error: "not_found" }, { status: 404 });
+  }
+
+  const supabase = createClient(context.request.headers, context.cookies);
+  if (!supabase) {
+    return Response.json({ error: "db_error", message: "Supabase is not configured" }, { status: 500 });
+  }
+
+  let session: WorkoutSessionWithSets | null;
+  try {
+    session = await loadOwnedSession(supabase, sessionId, userId);
+  } catch (err) {
+    console.error("Failed to load session", { userId, sessionId, cause: err });
+    return Response.json({ error: "db_error" }, { status: 500 });
+  }
+  if (!session) {
+    return Response.json({ error: "not_found" }, { status: 404 });
+  }
+
+  let body: unknown;
+  try {
+    body = await context.request.json();
+  } catch {
+    return Response.json({ error: "invalid_json" }, { status: 400 });
+  }
+
+  const result = identifyingFieldsSchema.safeParse(body);
+  if (!result.success) {
+    return Response.json({ error: "validation_error", issues: result.error.issues }, { status: 400 });
+  }
+
+  try {
+    await deleteSet(supabase, sessionId, result.data.exercise_id, result.data.set_number);
+    return new Response(null, { status: 204 });
+  } catch (err) {
+    console.error("Failed to delete set", { userId, sessionId, cause: err });
+    return Response.json({ error: "db_error" }, { status: 500 });
+  }
+};

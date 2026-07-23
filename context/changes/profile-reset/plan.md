@@ -362,13 +362,13 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 ##### Automated
 
-- [ ] 5.1 Migration applies cleanly: `npx supabase migration up`
-- [ ] 5.2 Lint passes: `npm run lint`
-- [ ] 5.3 Build succeeds: `npm run build`
+- [x] 5.1 Migration applies cleanly: `npx supabase migration up` — 6dcbf7f
+- [x] 5.2 Lint passes: `npm run lint` — 6dcbf7f
+- [x] 5.3 Build succeeds: `npm run build` — 6dcbf7f
 
 ##### Manual
 
 - [ ] 5.4 Active-session guard still blocks reset via the app-layer pre-check (unchanged UX)
-- [ ] 5.5 Seed an active session after the pre-check would pass (or call `reset_user_profile` directly) → RPC itself raises `active_workout_session`, no workouts archived
+- [x] 5.5 Seed an active session after the pre-check would pass (or call `reset_user_profile` directly) → RPC itself raises `active_workout_session`, no workouts archived — verified 2026-07-23 by simulating an authenticated `reset_user_profile` call directly against the local DB (bypassing the app route) with an active session present: raised `active_workout_session` and rolled back with no changes to `user_profiles`/`workouts`
 - [ ] 5.6 Cancel in the dialog still sends no request and closes the dialog
 - [ ] 5.7 Reset + retake + regenerate still works end-to-end with no regression from the shared `archive_active_plan` refactor

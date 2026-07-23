@@ -298,7 +298,7 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Manual
 
-- [x] 1.4 Supabase Studio shows `user_profiles_delete` policy — user-verified 2026-07-22
+- [x] 1.4 Supabase Studio shows `user_profiles_delete` policy — user-verified 2026-07-22 — 57124f9
 
 ### Phase 2: Backend — service functions + API route
 
@@ -310,8 +310,8 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Manual
 
-- [x] 2.4 POST `/api/profile/reset` deletes the profile and redirects to blank `/onboarding` — user-verified 2026-07-22
-- [x] 2.5 POST `/api/profile/reset` with an active session is blocked with `?error=` — user-verified 2026-07-22
+- [x] 2.4 POST `/api/profile/reset` deletes the profile and redirects to blank `/onboarding` — user-verified 2026-07-22 — 57124f9
+- [x] 2.5 POST `/api/profile/reset` with an active session is blocked with `?error=` — user-verified 2026-07-22 — 57124f9
 
 ### Phase 3: Frontend — confirmation modal + wiring
 
@@ -322,11 +322,11 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Manual
 
-- [x] 3.3 Cancel in dialog sends no request — user-verified 2026-07-22
-- [x] 3.4 Confirm in dialog resets profile and redirects to blank onboarding form — user-verified 2026-07-22
-- [x] 3.5 Retaking the survey saves a fresh profile and dashboard shows `PlanGenerator` — re-verified 2026-07-22 after Phase 4 landed (originally failed 2026-07-22: `PlanGenerator` did NOT show, stale plan stayed visible; see Phase 4)
-- [x] 3.6 Active-session guard error is visible on the profile summary page — user-verified 2026-07-22
-- [x] 3.7 Post-reset plan regeneration archives the prior plan with no regression — superseded by Phase 4's 4.5/4.6, both verified
+- [x] 3.3 Cancel in dialog sends no request — user-verified 2026-07-22 — 57124f9
+- [x] 3.4 Confirm in dialog resets profile and redirects to blank onboarding form — user-verified 2026-07-22 — 57124f9
+- [x] 3.5 Retaking the survey saves a fresh profile and dashboard shows `PlanGenerator` — re-verified 2026-07-22 after Phase 4 landed (originally failed 2026-07-22: `PlanGenerator` did NOT show, stale plan stayed visible; see Phase 4) — 57124f9
+- [x] 3.6 Active-session guard error is visible on the profile summary page — user-verified 2026-07-22 — 57124f9
+- [x] 3.7 Post-reset plan regeneration archives the prior plan with no regression — superseded by Phase 4's 4.5/4.6, both verified — 57124f9
 
 ### Phase 4: Fix — archive the active plan atomically during reset
 
@@ -339,9 +339,9 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 #### Manual
 
-- [x] 4.5 Reset+retake with an existing plan → dashboard shows `PlanGenerator` and a fresh plan appears (not the stale one) — user-verified 2026-07-22: 2 workouts × 5 exercises generated, confirmed on screen
-- [x] 4.6 Old plan's workouts are archived (`is_archived = true`) and no longer in `user_plan` — verified directly in DB 2026-07-22: 2 active / 5 archived workouts, `user_plan` has exactly 2 rows matching the active ones
-- [x] 4.7 Active-session guard (Phase 2) still blocks reset unchanged — user-verified 2026-07-22
+- [x] 4.5 Reset+retake with an existing plan → dashboard shows `PlanGenerator` and a fresh plan appears (not the stale one) — user-verified 2026-07-22: 2 workouts × 5 exercises generated, confirmed on screen — 57124f9
+- [x] 4.6 Old plan's workouts are archived (`is_archived = true`) and no longer in `user_plan` — verified directly in DB 2026-07-22: 2 active / 5 archived workouts, `user_plan` has exactly 2 rows matching the active ones — 57124f9
+- [x] 4.7 Active-session guard (Phase 2) still blocks reset unchanged — user-verified 2026-07-22 — 57124f9
 
 ### Phase 5: Post-review hardening (PR #10 code review, 2026-07-23)
 
@@ -368,7 +368,7 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 ##### Manual
 
-- [x] 5.4 Active-session guard still blocks reset via the app-layer pre-check (unchanged UX) — user-verified 2026-07-23
-- [x] 5.5 Seed an active session after the pre-check would pass (or call `reset_user_profile` directly) → RPC itself raises `active_workout_session`, no workouts archived — verified 2026-07-23 by simulating an authenticated `reset_user_profile` call directly against the local DB (bypassing the app route) with an active session present: raised `active_workout_session` and rolled back with no changes to `user_profiles`/`workouts`
-- [x] 5.6 Cancel in the dialog still sends no request and closes the dialog — user-verified 2026-07-23
-- [x] 5.7 Reset + retake + regenerate still works end-to-end with no regression from the shared `archive_active_plan` refactor — user-verified 2026-07-23
+- [x] 5.4 Active-session guard still blocks reset via the app-layer pre-check (unchanged UX) — user-verified 2026-07-23 — 31897c1
+- [x] 5.5 Seed an active session after the pre-check would pass (or call `reset_user_profile` directly) → RPC itself raises `active_workout_session`, no workouts archived — verified 2026-07-23 by simulating an authenticated `reset_user_profile` call directly against the local DB (bypassing the app route) with an active session present: raised `active_workout_session` and rolled back with no changes to `user_profiles`/`workouts` — edcac7f
+- [x] 5.6 Cancel in the dialog still sends no request and closes the dialog — user-verified 2026-07-23 — 31897c1
+- [x] 5.7 Reset + retake + regenerate still works end-to-end with no regression from the shared `archive_active_plan` refactor — user-verified 2026-07-23 — 31897c1

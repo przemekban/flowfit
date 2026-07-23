@@ -1,9 +1,9 @@
 ---
 change_id: profile-reset
 title: Let users edit or reset their onboarding survey after saving
-status: implementing
+status: implemented
 created: 2026-07-16
-updated: 2026-07-22
+updated: 2026-07-23
 archived_at: null
 ---
 

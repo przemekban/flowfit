@@ -54,7 +54,21 @@ export const POST: APIRoute = async (context) => {
 
   if (rpcError) {
     console.error("Plan persistence failed", { userId, cause: rpcError });
-    return Response.json({ error: "db_error", message: rpcError.message }, { status: 500 });
+
+    // save_generated_training_plan re-checks profile existence inside its own transaction
+    // (supabase/migrations/20260723000000_reset_rpc_hardening.sql) - this fires if the profile
+    // was reset concurrently while this request was waiting on the Gemini call above.
+    if (rpcError.message === "profile_missing") {
+      return Response.json(
+        {
+          error: "profile_missing",
+          message: "Your profile was reset while your plan was generating. Please retake the survey and try again.",
+        },
+        { status: 409 },
+      );
+    }
+
+    return Response.json({ error: "db_error", message: "Failed to save your training plan" }, { status: 500 });
   }
 
   return Response.json({ success: true }, { status: 200 });

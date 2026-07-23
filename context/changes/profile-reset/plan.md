@@ -368,7 +368,7 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 
 ##### Manual
 
-- [ ] 5.4 Active-session guard still blocks reset via the app-layer pre-check (unchanged UX)
+- [x] 5.4 Active-session guard still blocks reset via the app-layer pre-check (unchanged UX) — user-verified 2026-07-23
 - [x] 5.5 Seed an active session after the pre-check would pass (or call `reset_user_profile` directly) → RPC itself raises `active_workout_session`, no workouts archived — verified 2026-07-23 by simulating an authenticated `reset_user_profile` call directly against the local DB (bypassing the app route) with an active session present: raised `active_workout_session` and rolled back with no changes to `user_profiles`/`workouts`
-- [ ] 5.6 Cancel in the dialog still sends no request and closes the dialog
-- [ ] 5.7 Reset + retake + regenerate still works end-to-end with no regression from the shared `archive_active_plan` refactor
+- [x] 5.6 Cancel in the dialog still sends no request and closes the dialog — user-verified 2026-07-23
+- [x] 5.7 Reset + retake + regenerate still works end-to-end with no regression from the shared `archive_active_plan` refactor — user-verified 2026-07-23

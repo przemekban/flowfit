@@ -5,6 +5,7 @@ import { ServerError } from "@/components/auth/ServerError";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -69,15 +70,11 @@ export function ProfileSummary({ profile, error }: ProfileSummaryProps) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setIsResetOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
             <form method="POST" action="/api/profile/reset">
               <Button type="submit" variant="destructive">
                 Reset profile

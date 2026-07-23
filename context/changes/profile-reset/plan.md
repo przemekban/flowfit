@@ -342,3 +342,33 @@ No data backfill required. The migration only adds a new DELETE policy and GRANT
 - [x] 4.5 Reset+retake with an existing plan → dashboard shows `PlanGenerator` and a fresh plan appears (not the stale one) — user-verified 2026-07-22: 2 workouts × 5 exercises generated, confirmed on screen
 - [x] 4.6 Old plan's workouts are archived (`is_archived = true`) and no longer in `user_plan` — verified directly in DB 2026-07-22: 2 active / 5 archived workouts, `user_plan` has exactly 2 rows matching the active ones
 - [x] 4.7 Active-session guard (Phase 2) still blocks reset unchanged — user-verified 2026-07-22
+
+### Phase 5: Post-review hardening (PR #10 code review, 2026-07-23)
+
+#### Overview
+
+`/code-review high` on PR #10 found 6 issues; 5 confirmed + 1 plausible, all fixed in `supabase/migrations/20260723000000_reset_rpc_hardening.sql` plus small app-layer changes. One candidate (RPC missing a "zero rows deleted" guard before archiving) was investigated and REFUTED — the advisory lock already serializes duplicate/double-click submissions into safe no-ops, so no fix was needed there.
+
+#### Fixes
+
+1. **Active-session guard was racy and bypassable** (`src/pages/api/profile/reset.ts` guard vs. RPC call were separate round-trips; the RPC never re-checked session state and was directly callable by any authenticated client). Fixed by moving the check into `reset_user_profile` itself, inside its own transaction, raising `active_workout_session` if a session is active. The app-layer `hasActiveWorkoutSession` pre-check stays as a fast path (quick redirect without touching the lock), but is no longer the only thing enforcing the rule — the RPC is now the real gate, race-free and unbypassable.
+2. **Plan-generation vs. reset race could leak a stale active plan for a profile-less user** (`src/pages/api/plan.ts`'s `getUserProfile` check happens before the slow Gemini call, so a concurrent reset could complete in between and `save_generated_training_plan` would insert a plan for a user with no profile row). Fixed by having `save_generated_training_plan` re-check `EXISTS (SELECT 1 FROM user_profiles WHERE id = p_user_id)` inside its own transaction, immediately before writing, raising `profile_missing` if the profile is gone. `src/pages/api/plan.ts` now maps that to a friendly 409 asking the user to retake the survey.
+3. **Archive-and-clear SQL duplicated verbatim between the two RPCs**. Fixed by extracting `archive_active_plan(p_user_id)` — both `reset_user_profile` and `save_generated_training_plan` now call it instead of repeating the `UPDATE workouts ...` / `DELETE FROM user_plan ...` pair.
+4. **`radix-ui` umbrella package inconsistent with the project's existing scoped `@radix-ui/react-*` convention**. Fixed: swapped for `@radix-ui/react-dialog` (matching `button.tsx`'s `@radix-ui/react-slot`); `src/components/ui/dialog.tsx` now imports `* as DialogPrimitive from "@radix-ui/react-dialog"`.
+5. **Cancel button manually reimplemented dialog-close instead of using the already-exported `DialogClose`**. Fixed in `ProfileSummary.tsx` — Cancel is now `<DialogClose asChild>`.
+6. **Raw RPC/Postgres error text was surfaced verbatim to the user via `?error=`**. Fixed: `src/pages/api/profile/reset.ts` now maps known RPC exceptions (`active_workout_session`) to a friendly message via an allowlist and falls back to a generic "Something went wrong" for anything unrecognized, instead of forwarding `err.message` directly. `src/pages/api/plan.ts`'s generic `db_error` branch was similarly changed to a fixed message instead of forwarding `rpcError.message`.
+
+#### Progress
+
+##### Automated
+
+- [ ] 5.1 Migration applies cleanly: `npx supabase migration up`
+- [ ] 5.2 Lint passes: `npm run lint`
+- [ ] 5.3 Build succeeds: `npm run build`
+
+##### Manual
+
+- [ ] 5.4 Active-session guard still blocks reset via the app-layer pre-check (unchanged UX)
+- [ ] 5.5 Seed an active session after the pre-check would pass (or call `reset_user_profile` directly) → RPC itself raises `active_workout_session`, no workouts archived
+- [ ] 5.6 Cancel in the dialog still sends no request and closes the dialog
+- [ ] 5.7 Reset + retake + regenerate still works end-to-end with no regression from the shared `archive_active_plan` refactor

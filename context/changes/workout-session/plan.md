@@ -512,8 +512,8 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Automated
 
-- [x] 6.1 Type checking passes
-- [x] 6.2 Linting passes
+- [x] 6.1 Type checking passes — 7c43f40
+- [x] 6.2 Linting passes — 7c43f40
 - [ ] 6.3 Unit tests pass (if debounce logic is extracted)
 
 #### Manual

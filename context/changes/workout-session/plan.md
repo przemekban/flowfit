@@ -514,7 +514,7 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 - [x] 6.1 Type checking passes — 7c43f40
 - [x] 6.2 Linting passes — 7c43f40
-- [ ] 6.3 Unit tests pass (if debounce logic is extracted)
+- [x] 6.3 Unit tests pass (if debounce logic is extracted) — N/A (kept inline in SetRow.tsx; no component-testing harness in this repo)
 
 #### Manual
 

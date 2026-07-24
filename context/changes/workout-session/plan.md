@@ -461,8 +461,8 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [ ] 1.4 CHECK constraint rejects both-set and neither-set workout_sets rows
-- [ ] 1.5 restart_workout_session RPC delete-vs-abandon branching verified manually
+- [x] 1.4 CHECK constraint rejects both-set and neither-set workout_sets rows
+- [x] 1.5 restart_workout_session RPC delete-vs-abandon branching verified manually
 
 ### Phase 2: Service & Validation Layer
 
@@ -537,5 +537,5 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [ ] 7.4 test:e2e passes locally against a fresh supabase start
-- [ ] 7.5 Intentionally broken autosave endpoint causes the E2E test to fail (not a false positive)
+- [x] 7.4 test:e2e passes locally against a fresh supabase start
+- [x] 7.5 Intentionally broken autosave endpoint causes the E2E test to fail (not a false positive)

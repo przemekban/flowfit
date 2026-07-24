@@ -21,9 +21,12 @@ interface SetRowProps {
   exerciseId: string;
   trackingType: TrackingType;
   setNumber: number;
-  initialQuantity: number | null;
-  initialWeightKg: number | null;
-  initialHasSaved: boolean;
+  /** Already-persisted value for this row (resumed/just-saved set). Rendered as the actual input value. */
+  savedQuantity: number | null;
+  savedWeightKg: number | null;
+  /** Suggested last-known value for a row that has never been saved. Rendered as a placeholder hint only. */
+  placeholderQuantity: number | null;
+  placeholderWeightKg: number | null;
   onSaveFailed: () => void;
   onSaved: () => void;
   onPendingChange: (key: string, payload: PendingSetPayload | null) => void;
@@ -34,17 +37,18 @@ export default function SetRow({
   exerciseId,
   trackingType,
   setNumber,
-  initialQuantity,
-  initialWeightKg,
-  initialHasSaved,
+  savedQuantity,
+  savedWeightKg,
+  placeholderQuantity,
+  placeholderWeightKg,
   onSaveFailed,
   onSaved,
   onPendingChange,
 }: SetRowProps) {
-  const [quantity, setQuantity] = useState(initialQuantity !== null ? String(initialQuantity) : "");
-  const [weight, setWeight] = useState(initialWeightKg !== null ? String(initialWeightKg) : "");
-  const hasSavedRef = useRef(initialHasSaved);
-  const hasFiredOnSavedRef = useRef(initialHasSaved);
+  const [quantity, setQuantity] = useState(savedQuantity !== null ? String(savedQuantity) : "");
+  const [weight, setWeight] = useState(savedWeightKg !== null ? String(savedWeightKg) : "");
+  const hasSavedRef = useRef(savedQuantity !== null);
+  const hasFiredOnSavedRef = useRef(savedQuantity !== null);
   const debounceRef = useRef<number | null>(null);
   const requestIdRef = useRef(0);
   const rowKey = `${exerciseId}:${setNumber}`;
@@ -167,6 +171,7 @@ export default function SetRow({
           inputMode="numeric"
           min={1}
           value={quantity}
+          placeholder={placeholderQuantity !== null ? String(placeholderQuantity) : undefined}
           onChange={handleQuantityChange}
         />
       </div>
@@ -181,6 +186,7 @@ export default function SetRow({
           min={0}
           step="0.5"
           value={weight}
+          placeholder={placeholderWeightKg !== null ? String(placeholderWeightKg) : undefined}
           onChange={handleWeightChange}
         />
       </div>

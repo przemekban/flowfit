@@ -159,13 +159,12 @@ export default function SessionLogger({ workout, session, lastLoggedSets, needsC
                     exerciseId={we.exercise_id}
                     trackingType={we.exercise.tracking_type}
                     setNumber={setNumber}
-                    initialQuantity={
-                      existing
-                        ? (existing.reps ?? existing.duration_seconds)
-                        : (prefill?.reps ?? prefill?.duration_seconds ?? null)
+                    savedQuantity={existing ? (existing.reps ?? existing.duration_seconds) : null}
+                    savedWeightKg={existing ? existing.weight_kg : null}
+                    placeholderQuantity={
+                      !existing && setNumber === 1 ? (prefill?.reps ?? prefill?.duration_seconds ?? null) : null
                     }
-                    initialWeightKg={existing ? existing.weight_kg : (prefill?.weight_kg ?? null)}
-                    initialHasSaved={Boolean(existing)}
+                    placeholderWeightKg={!existing && setNumber === 1 ? (prefill?.weight_kg ?? null) : null}
                     onSaveFailed={() => {
                       handleSaveFailed(key);
                     }}

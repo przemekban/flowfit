@@ -19,14 +19,14 @@ GitHub Issues on `przemekban/flowfit`. Single milestone **MVP** groups all deliv
 
 | Issue | Roadmap ID | Change ID | Status |
 |---|---|---|---|
-| [#2](https://github.com/przemekban/flowfit/issues/2) | F-01 | `core-db-schema` | ready |
-| [#3](https://github.com/przemekban/flowfit/issues/3) | S-01 | `onboarding-survey` | proposed |
-| [#4](https://github.com/przemekban/flowfit/issues/4) | S-02 | `ai-plan-generation` | blocked |
-| [#5](https://github.com/przemekban/flowfit/issues/5) | S-03 | `workout-session-logging` | proposed |
-| [#6](https://github.com/przemekban/flowfit/issues/6) | S-04 | `workout-history` | proposed |
+| [#2](https://github.com/przemekban/flowfit/issues/2) | F-01 | `core-db-schema` | done |
+| [#3](https://github.com/przemekban/flowfit/issues/3) | S-01 | `onboarding-survey` | done |
+| [#4](https://github.com/przemekban/flowfit/issues/4) | S-02 | `ai-plan-generation` | done |
+| [#5](https://github.com/przemekban/flowfit/issues/5) | S-03 | `workout-session-logging` | done |
+| [#6](https://github.com/przemekban/flowfit/issues/6) | S-04 | `workout-history` | ready |
 | [#7](https://github.com/przemekban/flowfit/issues/7) | S-05 | `progress-indicators` | proposed |
-| [#8](https://github.com/przemekban/flowfit/issues/8) | ORQ-2 | — | open decision |
-| [#9](https://github.com/przemekban/flowfit/issues/9) | OQ-001 | — | post-MVP |
+| [#8](https://github.com/przemekban/flowfit/issues/8) | ORQ-2 | — | resolved |
+| [#9](https://github.com/przemekban/flowfit/issues/9) | OQ-001 | — | done |
 
 Source of truth for roadmap detail: `context/foundation/roadmap.md`.
 
@@ -35,19 +35,19 @@ Source of truth for roadmap detail: `context/foundation/roadmap.md`.
 ## Dependency chain
 
 ```
-#2 F-01 (core-db-schema)
-├── #3 S-01 (onboarding-survey)
-│   └── #4 S-02 (ai-plan-generation)  ← also blocked on #8 ORQ-2
-│       └── #5 S-03 (workout-session-logging)  ← north star
-│           └── #6 S-04 (workout-history)
+#2 F-01 (core-db-schema)          ✓ done
+├── #3 S-01 (onboarding-survey)   ✓ done
+│   └── #4 S-02 (ai-plan-generation)  ✓ done (was also blocked on #8 ORQ-2, resolved)
+│       └── #5 S-03 (workout-session-logging)  ✓ done  ← north star
+│           └── #6 S-04 (workout-history)  ready — prerequisites met
 │               └── #7 S-05 (progress-indicators)  [nice-to-have]
 │
-#8 ORQ-2 (AI provider decision)  ──── blocks #4 S-02
-#9 OQ-001 (profile reset)        ──── post-MVP, no blocking dependency
+#8 ORQ-2 (AI provider decision)  ──── resolved 2026-07-10 (Google Gemini)
+#9 OQ-001 (profile reset)        ──── done 2026-07-23, no blocking dependency
 ```
 
-**Start here:** `#2 F-01` is the only item with no prerequisites.  
-**North star:** `#5 S-03` (workout session logging) — the smallest end-to-end flow that proves the product hypothesis.
+**Start here:** `#6 S-04` is the next item with all prerequisites met (F-01, S-03 both done).  
+**North star:** `#5 S-03` (workout session logging) — shipped 2026-07-24; proved the end-to-end flow works.
 
 ---
 

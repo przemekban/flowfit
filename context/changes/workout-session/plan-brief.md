@@ -20,7 +20,7 @@ Tapping "Start workout" on the dashboard lands the user directly in a logging sc
 | --- | --- | --- |
 | Launch/resume | Explicit resume-or-restart modal | User wants control over stale sessions, not silent auto-resume |
 | Save trigger | Autosave, no button | Debounced save once reps+weight are both valid — no explicit "log set" tap |
-| Set defaults | Pre-fill from last session | Cross-session lookup now, not deferred to S-05, per user's explicit choice |
+| Set defaults | Pre-fill from last session, shown as a placeholder hint (not an auto-populated value) | Cross-session lookup now, not deferred to S-05; revised post-implementation (impl-review F4) — an auto-populated value the user never edits would never fire autosave, silently faking persistence |
 | Exercise layout | Single scrollable page | Simplest build, matches low-friction ethos, all exercises visible at once |
 | Finish criteria | No minimum sets required | Matches FR-010; a cut-short workout still saves |
 | Restart behavior | Abandon+keep if sets exist, delete if empty | Preserves logged data (PRD guardrail) but avoids empty orphan rows |

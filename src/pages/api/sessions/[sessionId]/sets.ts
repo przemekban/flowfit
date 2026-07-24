@@ -3,8 +3,8 @@ import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase";
 import { buildSetLogSchema } from "@/lib/validation/session";
-import { getSessionWithSets, getWorkoutWithExercises, upsertSet, deleteSet } from "@/lib/services/session";
-import type { WorkoutSessionWithSets } from "@/types";
+import { getSessionOwnership, getWorkoutWithExercises, upsertSet, deleteSet } from "@/lib/services/session";
+import type { WorkoutSession } from "@/types";
 
 export const prerender = false;
 
@@ -21,9 +21,9 @@ async function loadOwnedSession(
   supabase: SupabaseClient,
   sessionId: string,
   userId: string,
-): Promise<WorkoutSessionWithSets | null> {
+): Promise<WorkoutSession | null> {
   try {
-    const session = await getSessionWithSets(supabase, sessionId);
+    const session = await getSessionOwnership(supabase, sessionId);
     return session.user_id === userId ? session : null;
   } catch (err) {
     if (isPostgrestError(err) && err.code === "PGRST116") {
@@ -57,7 +57,7 @@ const handleSetWrite: APIRoute = async (context) => {
     return Response.json({ error: "db_error", message: "Supabase is not configured" }, { status: 500 });
   }
 
-  let session: WorkoutSessionWithSets | null;
+  let session: WorkoutSession | null;
   try {
     session = await loadOwnedSession(supabase, sessionId, userId);
   } catch (err) {
@@ -83,7 +83,13 @@ const handleSetWrite: APIRoute = async (context) => {
     return Response.json({ error: "validation_error", message: "exercise_id is required" }, { status: 400 });
   }
 
-  const workout = await getWorkoutWithExercises(supabase, userId, session.workout_id);
+  let workout: Awaited<ReturnType<typeof getWorkoutWithExercises>>;
+  try {
+    workout = await getWorkoutWithExercises(supabase, userId, session.workout_id);
+  } catch (err) {
+    console.error("Failed to load workout", { userId, sessionId, cause: err });
+    return Response.json({ error: "db_error" }, { status: 500 });
+  }
   const match = workout?.exercises.find((we) => we.exercise_id === exerciseId);
   if (!match) {
     return Response.json(
@@ -126,7 +132,7 @@ export const DELETE: APIRoute = async (context) => {
     return Response.json({ error: "db_error", message: "Supabase is not configured" }, { status: 500 });
   }
 
-  let session: WorkoutSessionWithSets | null;
+  let session: WorkoutSession | null;
   try {
     session = await loadOwnedSession(supabase, sessionId, userId);
   } catch (err) {

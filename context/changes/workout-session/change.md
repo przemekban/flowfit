@@ -1,7 +1,7 @@
 ---
 change_id: workout-session
 title: Workout session: launch, log sets/reps/weight, save
-status: implemented
+status: impl_reviewed
 created: 2026-07-16
 updated: 2026-07-24
 archived_at: null

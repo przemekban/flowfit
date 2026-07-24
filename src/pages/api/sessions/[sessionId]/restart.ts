@@ -52,6 +52,9 @@ export const POST: APIRoute = async (context) => {
   if (!existingSession) {
     return Response.json({ error: "not_found" }, { status: 404 });
   }
+  if (existingSession.status !== "active") {
+    return Response.json({ error: "conflict", message: "Session is not active" }, { status: 409 });
+  }
 
   try {
     const newSessionId = await restartSession(supabase, userId, existingSessionId, existingSession.workout_id);

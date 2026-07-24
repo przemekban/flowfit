@@ -108,6 +108,26 @@ export async function createSession(
   return data;
 }
 
+export async function getSessionOwnership(supabase: SupabaseClient, sessionId: string): Promise<WorkoutSession> {
+  const { data, error } = (await supabase
+    .from("workout_sessions")
+    .select("id, user_id, workout_id, status, started_at, completed_at")
+    .eq("id", sessionId)
+    .single()) as {
+    data: WorkoutSession | null;
+    error: PostgrestError | null;
+  };
+
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    throw new Error("Session not found");
+  }
+
+  return data;
+}
+
 interface SessionWithSetsRow extends WorkoutSession {
   workouts: Workout;
   workout_sets: (WorkoutSet & { exercises: Exercise })[];

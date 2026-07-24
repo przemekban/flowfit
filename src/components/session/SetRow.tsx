@@ -51,7 +51,13 @@ export default function SetRow({
   const hasFiredOnSavedRef = useRef(savedQuantity !== null);
   const debounceRef = useRef<number | null>(null);
   const requestIdRef = useRef(0);
+  const opQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const isMountedRef = useRef(true);
   const rowKey = `${exerciseId}:${setNumber}`;
+
+  function enqueue(op: () => Promise<void>) {
+    opQueueRef.current = opQueueRef.current.then(op);
+  }
 
   const clearPending = useCallback(() => {
     onPendingChange(rowKey, null);
@@ -59,6 +65,7 @@ export default function SetRow({
 
   useEffect(
     () => () => {
+      isMountedRef.current = false;
       if (debounceRef.current !== null) {
         window.clearTimeout(debounceRef.current);
       }
@@ -83,30 +90,37 @@ export default function SetRow({
         throw new Error(`Save failed with status ${response.status}`);
       }
       hasSavedRef.current = true;
-      if (!hasFiredOnSavedRef.current) {
+      if (isMountedRef.current && !hasFiredOnSavedRef.current) {
         hasFiredOnSavedRef.current = true;
         onSaved();
       }
-      clearPending();
+      if (isMountedRef.current) clearPending();
     } catch {
       if (attempt < MAX_RETRIES) {
         const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
         await new Promise((resolve) => window.setTimeout(resolve, delay));
+        if (!isMountedRef.current) return;
         await persist(payload, attempt + 1);
         return;
       }
-      clearPending();
-      onSaveFailed();
+      if (isMountedRef.current) {
+        clearPending();
+        onSaveFailed();
+      }
     }
   }
 
   async function deletePersisted() {
     hasSavedRef.current = false;
     try {
+      // keepalive lets this request finish even if the tab is being closed
+      // (e.g. cleared right before navigate-away), since it isn't covered
+      // by the beforeunload/sendBeacon fallback (sendBeacon only does POST).
       await fetch(`/api/sessions/${sessionId}/sets`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exercise_id: exerciseId, set_number: setNumber }),
+        keepalive: true,
       });
     } catch {
       // best-effort; the row is already visibly cleared client-side
@@ -132,7 +146,7 @@ export default function SetRow({
     if (!isValid) {
       clearPending();
       if (hasSavedRef.current) {
-        void deletePersisted();
+        enqueue(() => deletePersisted());
       }
       return;
     }
@@ -143,7 +157,7 @@ export default function SetRow({
     debounceRef.current = window.setTimeout(() => {
       debounceRef.current = null;
       if (requestId !== requestIdRef.current) return;
-      void persist(payload, 0);
+      enqueue(() => persist(payload, 0));
     }, DEBOUNCE_MS);
   }
 

@@ -490,11 +490,11 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [x] 4.3 PUT set endpoint: valid set 200s, invalid set 400s
-- [x] 4.4 Complete endpoint: cross-user access returns 404
-- [x] 4.5 Restart endpoint: old session abandoned, new active session created
-- [x] 4.6 DELETE set endpoint: removes row, idempotent on repeat
-- [x] 4.7 POST beacon-alias handler: parity with PUT
+- [x] 4.3 PUT set endpoint: valid set 200s, invalid set 400s — 2ceaca3
+- [x] 4.4 Complete endpoint: cross-user access returns 404 — 2ceaca3
+- [x] 4.5 Restart endpoint: old session abandoned, new active session created — 2ceaca3
+- [x] 4.6 DELETE set endpoint: removes row, idempotent on repeat — 2ceaca3
+- [x] 4.7 POST beacon-alias handler: parity with PUT — 2ceaca3
 
 ### Phase 5: Session Page & Wiring
 
@@ -505,10 +505,10 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [x] 5.3 First launch lands directly in logging UI (zero intermediate screens)
-- [x] 5.4 Second visit to an active session shows resume/restart modal
-- [x] 5.5 Signed-out access to /session/* redirects to signin
-- [x] 5.6 Cross-user workout id access rejected
+- [x] 5.3 First launch lands directly in logging UI (zero intermediate screens) — 8506b46
+- [x] 5.4 Second visit to an active session shows resume/restart modal — 8506b46
+- [x] 5.5 Signed-out access to /session/* redirects to signin — 8506b46
+- [x] 5.6 Cross-user workout id access rejected — 8506b46
 
 ### Phase 6: React Islands
 
@@ -520,22 +520,22 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [x] 6.4 Logged set persists after reload (real autosave, not local state)
-- [x] 6.5 Editing a logged set upserts rather than duplicating
-- [x] 6.6 Fresh exercise starts blank; previously-logged exercise pre-fills
-- [x] 6.7 Offline save failure shows banner only after all 3 retries exhausted, input values preserved
-- [x] 6.8 Clearing a saved field deletes the persisted row; clearing a never-saved field makes no API call
-- [x] 6.9 Native "leave site?" prompt appears when navigating away with a pending debounced save
-- [x] 6.10 Finish with zero sets logged succeeds and redirects
-- [x] 6.11 Full dashboard-to-first-input path confirmed at most two taps
+- [x] 6.4 Logged set persists after reload (real autosave, not local state) — 8506b46
+- [x] 6.5 Editing a logged set upserts rather than duplicating — 8506b46
+- [x] 6.6 Fresh exercise starts blank; previously-logged exercise pre-fills — 8506b46
+- [x] 6.7 Offline save failure shows banner only after all 3 retries exhausted, input values preserved — 8506b46
+- [x] 6.8 Clearing a saved field deletes the persisted row; clearing a never-saved field makes no API call — 8506b46
+- [x] 6.9 Native "leave site?" prompt appears when navigating away with a pending debounced save — 2ceaca3
+- [x] 6.10 Finish with zero sets logged succeeds and redirects — 2ceaca3
+- [x] 6.11 Full dashboard-to-first-input path confirmed at most two taps — 2ceaca3
 
 ### Phase 7: Playwright E2E & CI Wiring
 
 #### Automated
 
-- [x] 7.1 Vitest suite passes in CI
-- [x] 7.2 Playwright E2E suite passes in CI
-- [x] 7.3 Full CI job green on the PR
+- [x] 7.1 Vitest suite passes in CI — dd4d0ac
+- [x] 7.2 Playwright E2E suite passes in CI — dd4d0ac
+- [x] 7.3 Full CI job green on the PR — dd4d0ac
 
 #### Manual
 

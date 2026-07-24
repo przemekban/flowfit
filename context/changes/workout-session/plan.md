@@ -488,11 +488,11 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Manual
 
-- [ ] 4.3 PUT set endpoint: valid set 200s, invalid set 400s
-- [ ] 4.4 Complete endpoint: cross-user access returns 404
-- [ ] 4.5 Restart endpoint: old session abandoned, new active session created
-- [ ] 4.6 DELETE set endpoint: removes row, idempotent on repeat
-- [ ] 4.7 POST beacon-alias handler: parity with PUT
+- [x] 4.3 PUT set endpoint: valid set 200s, invalid set 400s
+- [x] 4.4 Complete endpoint: cross-user access returns 404
+- [x] 4.5 Restart endpoint: old session abandoned, new active session created
+- [x] 4.6 DELETE set endpoint: removes row, idempotent on repeat
+- [x] 4.7 POST beacon-alias handler: parity with PUT
 
 ### Phase 5: Session Page & Wiring
 
@@ -523,9 +523,9 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 - [x] 6.6 Fresh exercise starts blank; previously-logged exercise pre-fills
 - [x] 6.7 Offline save failure shows banner only after all 3 retries exhausted, input values preserved
 - [x] 6.8 Clearing a saved field deletes the persisted row; clearing a never-saved field makes no API call
-- [ ] 6.9 Native "leave site?" prompt appears when navigating away with a pending debounced save
-- [ ] 6.10 Finish with zero sets logged succeeds and redirects
-- [ ] 6.11 Full dashboard-to-first-input path confirmed at most two taps
+- [x] 6.9 Native "leave site?" prompt appears when navigating away with a pending debounced save
+- [x] 6.10 Finish with zero sets logged succeeds and redirects
+- [x] 6.11 Full dashboard-to-first-input path confirmed at most two taps
 
 ### Phase 7: Playwright E2E & CI Wiring
 

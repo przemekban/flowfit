@@ -1,0 +1,51 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import {
+  getWorkoutWithExercises,
+  getActiveSessionForWorkout,
+  createSession,
+  getSessionWithSets,
+  getLastLoggedSets,
+} from "@/lib/services/session";
+import SessionLogger from "@/components/session/SessionLogger";
+
+const { user } = Astro.locals;
+const { workoutId } = Astro.params;
+
+if (!user || !workoutId) {
+  return Astro.redirect("/dashboard");
+}
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+if (!supabase) {
+  return new Response("Supabase is not configured", { status: 500 });
+}
+
+const workout = await getWorkoutWithExercises(supabase, user.id, workoutId);
+if (!workout) {
+  return new Response(null, { status: 404 });
+}
+
+const existingSession = await getActiveSessionForWorkout(supabase, user.id, workoutId);
+const needsChoice = existingSession !== null;
+const activeSession = existingSession ?? (await createSession(supabase, user.id, workoutId));
+
+const session = await getSessionWithSets(supabase, activeSession.id);
+const exerciseIds = workout.exercises.map((we) => we.exercise_id);
+const lastLoggedSets = await getLastLoggedSets(supabase, user.id, exerciseIds, session.id);
+---
+
+<Layout title={`Session · ${workout.name}`}>
+  <div class="bg-cosmic flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+    <div class="w-full max-w-2xl">
+      <SessionLogger
+        client:load
+        workout={workout}
+        session={session}
+        lastLoggedSets={lastLoggedSets}
+        needsChoice={needsChoice}
+      />
+    </div>
+  </div>
+</Layout>

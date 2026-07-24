@@ -125,3 +125,5 @@ export type WorkoutSessionWithSets = WorkoutSession & {
   workout: Workout;
   sets: (WorkoutSet & { exercise: Exercise })[];
 };
+
+export type LastLoggedSets = Record<string, WorkoutSet | null>;

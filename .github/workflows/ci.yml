@@ -21,6 +21,25 @@ jobs:
       - run: npm ci
       - run: npx astro sync
       - run: npm run lint
+      - run: npm run test
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start
+      - name: Export local Supabase connection details
+        run: supabase status -o env | sed 's/"//g' >> "$GITHUB_ENV"
+      - name: Write Cloudflare local dev secrets
+        run: |
+          echo "SUPABASE_URL=$API_URL" >> .dev.vars
+          echo "SUPABASE_KEY=$ANON_KEY" >> .dev.vars
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          E2E_SUPABASE_URL: ${{ env.API_URL }}
+          E2E_SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop
       - run: npm run build
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

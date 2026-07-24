@@ -1,5 +1,7 @@
 ---
 import type { ActivePlanWorkout } from "@/types";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface Props {
   workouts: ActivePlanWorkout[];
@@ -12,9 +14,16 @@ const { workouts } = Astro.props;
   {
     workouts.map((workout) => (
       <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-left backdrop-blur-xl">
-        <h2 class="text-xl font-semibold text-white">Workout {workout.position}</h2>
-        <p class="mt-1 text-sm font-medium text-blue-100">{workout.name}</p>
-        {workout.description && <p class="mt-1 text-sm text-blue-100/60">{workout.description}</p>}
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-semibold text-white">Workout {workout.position}</h2>
+            <p class="mt-1 text-sm font-medium text-blue-100">{workout.name}</p>
+            {workout.description && <p class="mt-1 text-sm text-blue-100/60">{workout.description}</p>}
+          </div>
+          <a href={`/session/${workout.id}`} class:list={cn(buttonVariants({ size: "sm" }), "shrink-0")}>
+            Start workout
+          </a>
+        </div>
 
         <ul class="mt-4 space-y-2">
           {workout.exercises

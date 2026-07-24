@@ -531,9 +531,9 @@ Purely additive: a new CHECK constraint (only rejects rows that were already inv
 
 #### Automated
 
-- [ ] 7.1 Vitest suite passes in CI
-- [ ] 7.2 Playwright E2E suite passes in CI
-- [ ] 7.3 Full CI job green on the PR
+- [x] 7.1 Vitest suite passes in CI
+- [x] 7.2 Playwright E2E suite passes in CI
+- [x] 7.3 Full CI job green on the PR
 
 #### Manual
 

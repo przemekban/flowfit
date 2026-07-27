@@ -311,7 +311,7 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [x] 2.1 All 5 attack + 5 control cases + the `deleteSet` zero-rows-affected follow-up pass in `npm run test:integration`
+- [x] 2.1 All 5 attack + 5 control cases + the `deleteSet` zero-rows-affected follow-up pass in `npm run test:integration` — 23c5a68
 
 ### Phase 3: Risk #1 — dedupe ownership guard + hermetic contract tests (session routes)
 

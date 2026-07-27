@@ -300,18 +300,18 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [x] 1.1 `npm run test:integration` runs against a local Supabase instance and exits 0
-- [x] 1.2 `npm run test` does not pick up `tests/integration/**`
+- [x] 1.1 `npm run test:integration` runs against a local Supabase instance and exits 0 — 010e6b6
+- [x] 1.2 `npm run test` does not pick up `tests/integration/**` — 010e6b6
 
 #### Manual
 
-- [x] 1.3 Local run confirms two seeded users are created and cleaned up with no leftover rows
+- [x] 1.3 Local run confirms two seeded users are created and cleaned up with no leftover rows — 010e6b6
 
 ### Phase 2: Risk #2 — cross-user IDOR integration tests (real RLS)
 
 #### Automated
 
-- [ ] 2.1 All 5 attack + 5 control cases + the `deleteSet` zero-rows-affected follow-up pass in `npm run test:integration`
+- [x] 2.1 All 5 attack + 5 control cases + the `deleteSet` zero-rows-affected follow-up pass in `npm run test:integration`
 
 ### Phase 3: Risk #1 — dedupe ownership guard + hermetic contract tests (session routes)
 

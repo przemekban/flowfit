@@ -300,12 +300,12 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [ ] 1.1 `npm run test:integration` runs against a local Supabase instance and exits 0
-- [ ] 1.2 `npm run test` does not pick up `tests/integration/**`
+- [x] 1.1 `npm run test:integration` runs against a local Supabase instance and exits 0
+- [x] 1.2 `npm run test` does not pick up `tests/integration/**`
 
 #### Manual
 
-- [ ] 1.3 Local run confirms two seeded users are created and cleaned up with no leftover rows
+- [x] 1.3 Local run confirms two seeded users are created and cleaned up with no leftover rows
 
 ### Phase 2: Risk #2 — cross-user IDOR integration tests (real RLS)
 

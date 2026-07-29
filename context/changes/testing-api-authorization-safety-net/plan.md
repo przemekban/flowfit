@@ -10,7 +10,7 @@ Phase 1 of the phased test rollout (`context/foundation/test-plan.md` §3). Buil
 - Five functions in `src/lib/services/session.ts` (`getSessionOwnership`, `getSessionWithSets`, `upsertSet`, `deleteSet`, `completeSession`) query/mutate by row ID alone, with no `user_id` filter. Every current call site wraps the two reads in a `loadOwnedSession` helper — duplicated verbatim in `sets.ts`, `complete.ts`, `restart.ts` — that compares `session.user_id === userId` before trusting the result. RLS is the only other backstop; nothing today proves it holds.
 - The three `auth/*.ts` routes are missing `export const prerender = false` (AGENTS.md hard-rule violation), and `signup.ts`/`signin.ts` cast `form.get(...) as string` with zero zod validation — the only routes in the app without it.
 - `sessions/[sessionId]/*.ts` check `sessionId` for truthiness only; a malformed (non-UUID) value reaches Postgrest, throws a non-`PGRST116` error, and falls into the generic `500 db_error` branch instead of a `400`.
-- Zero tests exist under `src/pages/api`. The only test convention is hand-mocking the Supabase query builder (`src/lib/services/session.test.ts`) — no MSW/supertest in the project. CI runs Vitest *before* `supabase start`, so no live Postgres is available during today's test step.
+- Zero tests exist under `src/pages/api`. The only test convention is hand-mocking the Supabase query builder (`src/lib/services/session.test.ts`) — no MSW/supertest in the project. CI runs Vitest _before_ `supabase start`, so no live Postgres is available during today's test step.
 
 ## Desired End State
 
@@ -42,7 +42,7 @@ Two-layer split per `test-plan.md` §1 cost×signal: integration (real Postgres,
 
 ## Critical Implementation Details
 
-**RLS-denial test semantics**: A `.single()`/`.maybeSingle()` call whose target row is invisible under RLS returns the *same* `PGRST116` ("no rows returned") error as a genuinely nonexistent row — not a permission-denied error. Phase 2's assertions must match on this shape (mirroring the existing `isPostgrestError`/`PGRST116` check already used in `loadOwnedSession`), not assume a distinct "forbidden" signal exists.
+**RLS-denial test semantics**: A `.single()`/`.maybeSingle()` call whose target row is invisible under RLS returns the _same_ `PGRST116` ("no rows returned") error as a genuinely nonexistent row — not a permission-denied error. Phase 2's assertions must match on this shape (mirroring the existing `isPostgrestError`/`PGRST116` check already used in `loadOwnedSession`), not assume a distinct "forbidden" signal exists.
 
 **Test client session isolation**: Each seeded test identity in Phase 1's fixture needs its own `SupabaseClient` instance (anon key) authenticated via `signInWithPassword` — a single shared client's session state would leak between "act as user A" and "act as user B" assertions within the same test file.
 
@@ -114,6 +114,7 @@ Proves RLS blocks cross-user access to the five owner-filter-less `session.ts` f
 **Intent**: For each of `getSessionOwnership`, `getSessionWithSets`, `upsertSet`, `deleteSet`, `completeSession` (`src/lib/services/session.ts:111-266`), call it with userB's authenticated client targeting userA's seeded `sessionId`, and assert RLS denies the operation. Pair each with a control case using userA's own client/ID, proving the fixture and assertion shape are valid rather than "everything errors."
 
 **Contract**:
+
 - Reads (`getSessionOwnership`, `getSessionWithSets`): userB's call rejects with a `PostgrestError` coded `PGRST116`; userA's own call resolves with the row.
 - `upsertSet`, `completeSession` against userA's `sessionId` via userB's client: reject (RLS denies the underlying INSERT/UPDATE).
 - `deleteSet` against userA's `sessionId`/set via userB's client: resolves without throwing (a DELETE with an RLS-filtered `WHERE` simply matches zero rows) — assert via a follow-up read as userA that the set still exists, since `deleteSet`'s return type is `void` and doesn't surface an affected-row count.
@@ -329,21 +330,21 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [x] 4.1 `npm run test` passes with new auth-route tests
-- [x] 4.2 `npm run lint` passes, no `as string` casts remain in `signup.ts`/`signin.ts`
-- [x] 4.3 `npm run build` succeeds
+- [x] 4.1 `npm run test` passes with new auth-route tests — 3a6f59f
+- [x] 4.2 `npm run lint` passes, no `as string` casts remain in `signup.ts`/`signin.ts` — 3a6f59f
+- [x] 4.3 `npm run build` succeeds — 3a6f59f
 
 #### Manual
 
-- [ ] 4.4 Sign up/sign in through the UI still work end-to-end
-- [ ] 4.5 Invalid email on signup returns a friendly `?error=` redirect, not a 500
+- [x] 4.4 Sign up/sign in through the UI still work end-to-end
+- [x] 4.5 Invalid email on signup returns a friendly `?error=` redirect, not a 500
 
 ### Phase 5: Cookbook + test-plan sync
 
 #### Automated
 
-- [ ] 5.1 `npm run format` produces no diff on the edited markdown
+- [x] 5.1 `npm run format` produces no diff on the edited markdown
 
 #### Manual
 
-- [ ] 5.2 §6.1/6.2/6.4/6.5 each point to a real, existing file from Phases 1-4
+- [x] 5.2 §6.1/6.2/6.4/6.5 each point to a real, existing file from Phases 1-4

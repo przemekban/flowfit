@@ -255,9 +255,9 @@ N/A — no schema or data migration in this phase; the one new fixture field (`w
 
 #### Automated
 
-- [ ] 1.1 `npm run test` passes
-- [ ] 1.2 `npm run lint` passes
-- [ ] 1.3 `npm run build` passes
+- [x] 1.1 `npm run test` passes
+- [x] 1.2 `npm run lint` passes
+- [x] 1.3 `npm run build` passes
 
 #### Manual
 

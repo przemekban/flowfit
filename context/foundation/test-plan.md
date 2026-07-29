@@ -160,7 +160,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.6 Per-rollout-phase notes
 
-(Filled in as each phase lands.)
+- **Phase 2 (Risk #5, `plan.ts`/`profile.ts`)**: `src/lib/services/plan.test.ts` is the reference for testing pure business-rule functions with hand-built fixtures (no query-builder mock needed) — narrow-equipment guard and candidate/tracking-type re-validation. `src/lib/services/profile.test.ts` is the reference for a 100%-I/O-bound service file, reusing the `createQueryBuilder`/direct-`rpc`-mock conventions from `session.test.ts`. Both extend into their route tests (`api/plan.test.ts`, `api/profile.test.ts`, `api/profile/reset.test.ts`) via `vi.mock` per dependency module, asserting the full branch set rather than only the `401`/redirect case.
 
 ## 7. What We Deliberately Don't Test
 

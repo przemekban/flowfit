@@ -3,6 +3,12 @@ import { TEST_USER_EMAIL, TEST_USER_PASSWORD } from "./fixtures/seed";
 
 test("launch, log a set, resume after reload, and finish a workout session", async ({ page }) => {
   await page.goto("/auth/signin");
+  // SignInForm is a client:load React island with controlled inputs — filling before hydration
+  // attaches its onChange handlers sets the DOM value only; the subsequent hydration re-render
+  // then resets the input to its (still-empty) React state, silently discarding the typed value.
+  // Wait for the client bundle to finish loading first, mirroring the same convention used below
+  // for the session page's SessionLogger island.
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Email", { exact: true }).fill(TEST_USER_EMAIL);
   await page.getByLabel("Password", { exact: true }).fill(TEST_USER_PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();

@@ -13,9 +13,9 @@ const PASSWORD = "integration-test-password-123";
 
 export interface TestIdentity {
   id: string;
+  sessionId: string;
   workoutId: string;
   exerciseId: string;
-  sessionId: string;
   client: SupabaseClient;
 }
 
@@ -92,7 +92,7 @@ async function seedUser(admin: SupabaseClient, url: string, anonKey: string, lab
   const { error: signInError } = await client.auth.signInWithPassword({ email, password: PASSWORD });
   if (signInError) throw signInError;
 
-  return { id: userId, workoutId: workout.id, exerciseId: exercise.id, sessionId: session.id, client };
+  return { id: userId, sessionId: session.id, workoutId: workout.id, exerciseId: exercise.id, client };
 }
 
 export async function setupTwoUsers(): Promise<{ userA: TestIdentity; userB: TestIdentity; admin: SupabaseClient }> {

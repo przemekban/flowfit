@@ -91,6 +91,16 @@ describe("upsertSet", () => {
     );
     expect(result).toEqual(savedSet);
   });
+
+  it("rejects with the PostgrestError unchanged when the DB write fails", async () => {
+    const dbError = { code: "23514", message: "violates check constraint" };
+    const builder = createQueryBuilder({ data: null, error: dbError });
+    const supabase = { from: vi.fn(() => builder) } as unknown as SupabaseClient;
+
+    await expect(
+      upsertSet(supabase, "session-1", { exercise_id: "exercise-1", set_number: 1, reps: 10, weight_kg: 40 }),
+    ).rejects.toEqual(dbError);
+  });
 });
 
 describe("deleteSet", () => {

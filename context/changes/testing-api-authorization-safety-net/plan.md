@@ -317,21 +317,21 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [x] 3.1 `npm run test` passes with all new/extended unit tests
-- [x] 3.2 `npm run lint` passes, no duplicated `isPostgrestError`/`loadOwnedSession` remain
-- [x] 3.3 `npm run build` succeeds
+- [x] 3.1 `npm run test` passes with all new/extended unit tests — 6055192
+- [x] 3.2 `npm run lint` passes, no duplicated `isPostgrestError`/`loadOwnedSession` remain — 6055192
+- [x] 3.3 `npm run build` succeeds — 6055192
 
 #### Manual
 
-- [ ] 3.4 Unauthenticated `PUT /api/sessions/<real-id>/sets` returns 401; malformed `sessionId` on `complete` returns 400
+- [x] 3.4 Unauthenticated `PUT /api/sessions/<real-id>/sets` returns 401; malformed `sessionId` on `complete` returns 400
 
 ### Phase 4: Risk #1 — fix and cover the auth routes
 
 #### Automated
 
-- [ ] 4.1 `npm run test` passes with new auth-route tests
-- [ ] 4.2 `npm run lint` passes, no `as string` casts remain in `signup.ts`/`signin.ts`
-- [ ] 4.3 `npm run build` succeeds
+- [x] 4.1 `npm run test` passes with new auth-route tests
+- [x] 4.2 `npm run lint` passes, no `as string` casts remain in `signup.ts`/`signin.ts`
+- [x] 4.3 `npm run build` succeeds
 
 #### Manual
 

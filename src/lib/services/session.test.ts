@@ -99,7 +99,7 @@ describe("deleteSet", () => {
 
 describe("getLastLoggedSets", () => {
   it("maps rows into an exercise_id -> WorkoutSet record, missing exercises map to null", async () => {
-    const loggedSet: WorkoutSet & { workout_sessions: { user_id: string } } = {
+    const loggedSet: WorkoutSet = {
       id: "set-1",
       workout_session_id: "session-old",
       exercise_id: "exercise-1",
@@ -109,15 +109,13 @@ describe("getLastLoggedSets", () => {
       duration_seconds: null,
       notes: null,
       logged_at: "2026-07-19T00:00:00.000Z",
-      workout_sessions: { user_id: "user-1" },
     };
     const builder = createQueryBuilder({ data: [loggedSet], error: null });
     const supabase = { from: vi.fn(() => builder) } as unknown as SupabaseClient;
 
     const result = await getLastLoggedSets(supabase, "user-1", ["exercise-1", "exercise-2"], "session-current");
 
-    const { workout_sessions: _workoutSessions, ...expectedSet } = loggedSet;
-    expect(result["exercise-1"]).toEqual(expectedSet);
+    expect(result["exercise-1"]).toEqual(loggedSet);
     expect(result["exercise-2"]).toBeNull();
   });
 });

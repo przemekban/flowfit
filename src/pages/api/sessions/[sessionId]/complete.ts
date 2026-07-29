@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase";
-import { getSessionWithSets, completeSession, loadOwnedSession } from "@/lib/services/session";
-import type { WorkoutSessionWithSets } from "@/types";
+import { getSessionOwnership, completeSession, loadOwnedSession } from "@/lib/services/session";
+import type { WorkoutSession } from "@/types";
 
 export const prerender = false;
 
@@ -23,9 +23,9 @@ export const POST: APIRoute = async (context) => {
     return Response.json({ error: "db_error", message: "Supabase is not configured" }, { status: 500 });
   }
 
-  let session: WorkoutSessionWithSets | null;
+  let session: WorkoutSession | null;
   try {
-    session = await loadOwnedSession(() => getSessionWithSets(supabase, sessionId), userId);
+    session = await loadOwnedSession(() => getSessionOwnership(supabase, sessionId), userId);
   } catch (err) {
     console.error("Failed to load session", { userId, sessionId, cause: err });
     return Response.json({ error: "db_error" }, { status: 500 });

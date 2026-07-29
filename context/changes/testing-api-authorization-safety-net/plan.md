@@ -282,9 +282,16 @@ Fills in `test-plan.md`'s Phase-1-scoped cookbook sections now that the patterns
 
 The integration suite adds Supabase admin-API user creation/deletion per test-file run (a few seconds); it only runs in `test:integration`, never in the fast default `npm run test`, so day-to-day unit-test iteration speed is unaffected.
 
-## Migration Notes
+Database migrations included in this change:
 
-No database schema changes. `sessionId` format validation (`400` instead of `500` on malformed input) is a behavior change but strictly narrows an existing error path — no valid caller today relies on the `500` response.
+- `supabase/migrations/20260724110000_workout_session_logging_support.sql` (implements constraint, index, and `restart_workout_session` function)
+- `supabase/migrations/20260729183800_latest_workout_sets_view.sql` (implements optimized `latest_workout_sets` view for client pre-fills)
+
+Lessons Learned documentation added:
+
+- `context/foundation/lessons.md` (adds lessons on explicit RLS grants and exact test fixture teardown scoping)
+
+`sessionId` format validation (`400` instead of `500` on malformed input) is a behavior change but strictly narrows an existing error path — no valid caller today relies on the `500` response.
 
 ## References
 

@@ -331,7 +331,7 @@ Lessons Learned documentation added:
 
 #### Manual
 
-- [x] 3.4 Unauthenticated `PUT /api/sessions/<real-id>/sets` returns 401; malformed `sessionId` on `complete` returns 400
+- [x] 3.4 Unauthenticated `PUT /api/sessions/<real-id>/sets` returns 401; malformed `sessionId` on `complete` returns 400 — 3a6f59f
 
 ### Phase 4: Risk #1 — fix and cover the auth routes
 
@@ -343,8 +343,8 @@ Lessons Learned documentation added:
 
 #### Manual
 
-- [x] 4.4 Sign up/sign in through the UI still work end-to-end
-- [x] 4.5 Invalid email on signup returns a friendly `?error=` redirect, not a 500
+- [x] 4.4 Sign up/sign in through the UI still work end-to-end — e59a757
+- [x] 4.5 Invalid email on signup returns a friendly `?error=` redirect, not a 500 — e59a757
 
 ### Phase 5: Cookbook + test-plan sync
 

@@ -261,20 +261,20 @@ N/A — no schema or data migration in this phase; the one new fixture field (`w
 
 #### Manual
 
-- [ ] 1.4 Narrow-equipment onboarding smoke test in dev shows a clear failure message
+- [x] 1.4 Narrow-equipment onboarding smoke test in dev shows a clear failure message
 
 ### Phase 2: Risk #3 — session-logging autosave safety net + gate sync
 
 #### Automated
 
-- [x] 2.1 `npm run test` passes
-- [x] 2.2 `npx supabase start && npm run test:integration` passes
-- [x] 2.3 `npm run test:e2e` passes
-- [x] 2.4 `npm run lint` passes
-- [x] 2.5 `npm run build` passes
+- [x] 2.1 `npm run test` passes — 8eccd0c
+- [x] 2.2 `npx supabase start && npm run test:integration` passes — 8eccd0c
+- [x] 2.3 `npm run test:e2e` passes — 8eccd0c
+- [x] 2.4 `npm run lint` passes — 8eccd0c
+- [x] 2.5 `npm run build` passes — 8eccd0c
 
 #### Manual
 
-- [ ] 2.6 Devtools-blocked autosave shows banner after retries exhaust, value preserved
-- [ ] 2.7 Double-click "Start Over" results in exactly one session
+- [x] 2.6 Devtools-blocked autosave shows banner after retries exhaust, value preserved
+- [x] 2.7 Double-click "Start Over" results in exactly one session
 - [ ] 2.8 `test-plan.md` §5 e2e row reads `required (already wired)`, CI green end-to-end

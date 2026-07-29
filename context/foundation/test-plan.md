@@ -127,8 +127,8 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a unit test
 
-- **Service-layer logic** (e.g. `src/lib/services/*.ts`): hand-mock the Supabase query builder — a chainable object whose methods (`select`/`eq`/`neq`/`in`/`order`/`insert`/`update`/`upsert`/`delete`) each return the same builder, with `single()`/`maybeSingle()`/`then()` resolving a fixed `{ data, error }` result. No MSW, no real client. **Reference**: `src/lib/services/session.test.ts:1-44` (`createQueryBuilder` helper).
-- **API route handlers** (`src/pages/api/**/*.ts`): `vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }))`, dynamic-import the route module after the mock is registered, and build a minimal `APIContext` object exposing only what the handler reads (`locals.user`, `params`, `request`, `cookies`). Assert on `response.status` and `response.json()`. **Reference**: `src/pages/api/sessions/[sessionId]/sets.test.ts:1-38` (`buildContext` helper).
+- **Service-layer logic** (e.g. `src/lib/services/*.ts`): hand-mock the Supabase query builder — a chainable object whose methods (`select`/`eq`/`neq`/`in`/`order`/`insert`/`update`/`upsert`/`delete`) each return the same builder, with `single()`/`maybeSingle()`/`then()` resolving a fixed `{ data, error }` result. No MSW, no real client. **Reference**: `src/lib/services/session.test.ts` (`createQueryBuilder` helper).
+- **API route handlers** (`src/pages/api/**/*.ts`): `vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }))`, dynamic-import the route module after the mock is registered, and build a minimal `APIContext` object exposing only what the handler reads (`locals.user`, `params`, `request`, `cookies`). Assert on `response.status` and `response.json()`. **Reference**: `src/pages/api/sessions/[sessionId]/sets.test.ts` (`buildContext` helper).
 - **Location/naming**: co-located `<file>.test.ts` next to the file under test.
 - **Run locally**: `npm run test`.
 
@@ -136,7 +136,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 - **Location**: `tests/integration/`, config `vitest.integration.config.ts`, script `npm run test:integration`. Structurally separate from the unit path — `npm run test`'s `include` never picks these up.
 - **Fixture**: `tests/integration/fixtures/two-users.ts` seeds two real, authenticated identities (`setupTwoUsers()` → `{ userA, userB }`, each `{ id, sessionId, client }`) against a live local Supabase instance via the service-role admin API; each identity gets its own anon-key `SupabaseClient` signed in via `signInWithPassword` (session state does not leak between identities). Call `teardownTwoUsers()` in `afterAll` — deletes are scoped to the fixture's own generated emails only, per the lessons-learned rule on exact-identifier-scoped fixture cleanup. Env vars: `INTEGRATION_SUPABASE_URL`, `INTEGRATION_SUPABASE_ANON_KEY`, `INTEGRATION_SUPABASE_SERVICE_ROLE_KEY` (from `supabase status -o env`; wired automatically in CI).
-- **Reference test**: `tests/integration/session-ownership-rls.test.ts:1-30` (`beforeAll`/`afterAll` + per-function `describe` blocks).
+- **Reference test**: `tests/integration/session-ownership-rls.test.ts` (`beforeAll`/`afterAll` fixture setup + one `describe` block per function under test).
 - **Run locally**: `npx supabase start`, then `npm run test:integration`.
 
 ### 6.3 Adding an e2e test

@@ -15,3 +15,10 @@
 - **Problem**: A local/dev Supabase database is not exclusive to the test suite — it commonly also holds the developer's own manually-created accounts and data. A fixture that lists users/rows and deletes by anything looser than an exact match on an identifier the fixture itself generated (a prefix match, a "delete all except X", a broad `listUsers()` sweep filtered by a loose condition) risks silently destroying data the developer created by hand, with no warning and no easy recovery.
 - **Rule**: Every fixture/teardown delete must be scoped to an exact identifier the fixture itself created and controls (e.g. a full, fixture-specific email string it generated, or a UUID it received back from its own insert/create call) — never a prefix, wildcard, substring, or exclusion-based match. Before trusting a fixture's cleanup logic, verify with the target instance's audit trail (for Supabase: `SELECT * FROM auth.audit_log_entries WHERE payload->>'action' = 'user_deleted' ORDER BY created_at DESC` via `docker exec <db-container> psql -U postgres -d postgres -c "..."`) that only fixture-owned identifiers were ever deleted.
 - **Applies to**: plan, implement, impl-review
+
+## Never Prescribe `supabase db reset` to Verify Migrations
+
+- **Context**: Any /10x-plan phase that adds a new file under supabase/migrations/, specifically its 'Automated Verification' checklist step.
+- **Problem**: `npx supabase db reset` rebuilds the local Postgres volume from migrations+seed.sql; seed.sql never seeds user accounts, so every manually-registered auth.users row is destroyed. This recurred across multiple plans and even affected a separate git worktree, since the stack is shared (same project_id/ports).
+- **Rule**: Future 'Automated Verification' checklists must NOT prescribe `npx supabase db reset` as a migration-verification step; use `npx supabase migration up` instead, which applies only pending migrations without wiping existing data.
+- **Applies to**: plan, plan-review

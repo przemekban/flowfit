@@ -28,6 +28,11 @@ jobs:
       - run: supabase start
       - name: Export local Supabase connection details
         run: supabase status -o env | sed 's/"//g' >> "$GITHUB_ENV"
+      - run: npm run test:integration
+        env:
+          INTEGRATION_SUPABASE_URL: ${{ env.API_URL }}
+          INTEGRATION_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          INTEGRATION_SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
       - name: Write Cloudflare local dev secrets
         run: |
           echo "SUPABASE_URL=$API_URL" >> .dev.vars

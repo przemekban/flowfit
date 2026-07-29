@@ -108,6 +108,25 @@ export async function createSession(
   return data;
 }
 
+function isPostgrestError(err: unknown): err is PostgrestError {
+  return typeof err === "object" && err !== null && "code" in err;
+}
+
+export async function loadOwnedSession<T extends { user_id: string }>(
+  loader: () => Promise<T>,
+  userId: string,
+): Promise<T | null> {
+  try {
+    const session = await loader();
+    return session.user_id === userId ? session : null;
+  } catch (err) {
+    if (isPostgrestError(err) && err.code === "PGRST116") {
+      return null;
+    }
+    throw err;
+  }
+}
+
 export async function getSessionOwnership(supabase: SupabaseClient, sessionId: string): Promise<WorkoutSession> {
   const { data, error } = (await supabase
     .from("workout_sessions")
@@ -177,18 +196,12 @@ export async function getLastLoggedSets(
   }
 
   const { data, error } = (await supabase
-    .from("workout_sets")
-    .select(
-      `
-      id, workout_session_id, exercise_id, set_number, reps, weight_kg, duration_seconds, notes, logged_at,
-      workout_sessions!inner ( user_id )
-    `,
-    )
+    .from("latest_workout_sets")
+    .select("id, workout_session_id, exercise_id, set_number, reps, weight_kg, duration_seconds, notes, logged_at")
     .in("exercise_id", exerciseIds)
-    .eq("workout_sessions.user_id", userId)
-    .neq("workout_session_id", excludeSessionId)
-    .order("logged_at", { ascending: false })) as {
-    data: (WorkoutSet & { workout_sessions: { user_id: string } })[] | null;
+    .eq("user_id", userId)
+    .neq("workout_session_id", excludeSessionId)) as {
+    data: WorkoutSet[] | null;
     error: PostgrestError | null;
   };
 
@@ -197,10 +210,7 @@ export async function getLastLoggedSets(
   }
 
   for (const row of data ?? []) {
-    if (result[row.exercise_id] === null) {
-      const { workout_sessions: _workoutSessions, ...set } = row;
-      result[row.exercise_id] = set;
-    }
+    result[row.exercise_id] = row;
   }
 
   return result;

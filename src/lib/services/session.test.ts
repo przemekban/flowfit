@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WorkoutSession, WorkoutSet } from "@/types";
-import { createSession, deleteSet, getLastLoggedSets, restartSession, upsertSet } from "./session";
+import { createSession, deleteSet, getLastLoggedSets, loadOwnedSession, restartSession, upsertSet } from "./session";
 
 interface QueryResult {
   data: unknown;
@@ -99,7 +99,7 @@ describe("deleteSet", () => {
 
 describe("getLastLoggedSets", () => {
   it("maps rows into an exercise_id -> WorkoutSet record, missing exercises map to null", async () => {
-    const loggedSet: WorkoutSet & { workout_sessions: { user_id: string } } = {
+    const loggedSet: WorkoutSet = {
       id: "set-1",
       workout_session_id: "session-old",
       exercise_id: "exercise-1",
@@ -109,15 +109,13 @@ describe("getLastLoggedSets", () => {
       duration_seconds: null,
       notes: null,
       logged_at: "2026-07-19T00:00:00.000Z",
-      workout_sessions: { user_id: "user-1" },
     };
     const builder = createQueryBuilder({ data: [loggedSet], error: null });
     const supabase = { from: vi.fn(() => builder) } as unknown as SupabaseClient;
 
     const result = await getLastLoggedSets(supabase, "user-1", ["exercise-1", "exercise-2"], "session-current");
 
-    const { workout_sessions: _workoutSessions, ...expectedSet } = loggedSet;
-    expect(result["exercise-1"]).toEqual(expectedSet);
+    expect(result["exercise-1"]).toEqual(loggedSet);
     expect(result["exercise-2"]).toBeNull();
   });
 });
@@ -140,6 +138,40 @@ describe("createSession", () => {
     expect(builder.single).toHaveBeenCalled();
     expect(builder.maybeSingle).toHaveBeenCalled();
     expect(result).toEqual(existingSession);
+  });
+});
+
+describe("loadOwnedSession", () => {
+  it("returns the row when the loader's user_id matches the caller", async () => {
+    const loader = vi.fn(() => Promise.resolve(existingSession));
+
+    const result = await loadOwnedSession(loader, "user-1");
+
+    expect(result).toEqual(existingSession);
+  });
+
+  it("returns null when the loader's user_id does not match the caller", async () => {
+    const loader = vi.fn(() => Promise.resolve(existingSession));
+
+    const result = await loadOwnedSession(loader, "user-2");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the loader rejects with a PGRST116 not-found error", async () => {
+    const notFoundError = Object.assign(new Error("no rows returned"), { code: "PGRST116" });
+    const loader = vi.fn(() => Promise.reject(notFoundError));
+
+    const result = await loadOwnedSession(loader, "user-1");
+
+    expect(result).toBeNull();
+  });
+
+  it("rethrows any error that is not a PGRST116 PostgrestError", async () => {
+    const dbError = Object.assign(new Error("connection reset"), { code: "500" });
+    const loader = vi.fn(() => Promise.reject(dbError));
+
+    await expect(loadOwnedSession(loader, "user-1")).rejects.toEqual(dbError);
   });
 });
 

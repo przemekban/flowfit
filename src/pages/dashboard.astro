@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase";
 import { getActivePlan } from "@/lib/services/plan";
 import PlanGenerator from "@/components/plan/PlanGenerator";
 import PlanDisplay from "@/components/plan/PlanDisplay.astro";
+import Topbar from "@/components/Topbar.astro";
 
 const { user } = Astro.locals;
 const saved = Astro.url.searchParams.get("saved") === "1";
@@ -14,6 +15,9 @@ const activePlan = supabase && user ? await getActivePlan(supabase, user.id) : [
 
 <Layout title="Dashboard">
   <div class="bg-cosmic flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+    <div class="w-full max-w-2xl">
+      <Topbar />
+    </div>
     <div
       class="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl"
     >

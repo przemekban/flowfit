@@ -46,5 +46,5 @@ test("launch, log a set, resume after reload, and finish a workout session", asy
   await expect(resumedRow.getByLabel("Weight (kg)")).toHaveValue("20");
 
   await page.getByRole("button", { name: "Finish workout" }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page).toHaveURL(/\/history/);
 });

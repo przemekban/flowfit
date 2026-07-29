@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { APIContext } from "astro";
+import type { WorkoutSession } from "@/types";
 import { createClient } from "@/lib/supabase";
 import { loadOwnedSession, completeSession } from "@/lib/services/session";
 
@@ -52,14 +53,27 @@ describe("POST /api/sessions/[sessionId]/complete", () => {
       user: { id: "user-1" } as APIContext["locals"]["user"],
       sessionId: "11111111-1111-4111-a111-111111111111",
     });
+    const activeSession: WorkoutSession = {
+      id: "session-1",
+      user_id: "user-1",
+      workout_id: "workout-1",
+      status: "active",
+      started_at: "2026-07-20T00:00:00.000Z",
+      completed_at: null,
+    };
+    const completedSession: WorkoutSession = {
+      ...activeSession,
+      status: "completed",
+      completed_at: "2026-07-20T01:00:00.000Z",
+    };
     vi.mocked(createClient).mockReturnValue({} as never);
-    vi.mocked(loadOwnedSession).mockResolvedValue({ id: "session-1", status: "active" });
-    vi.mocked(completeSession).mockResolvedValue({ id: "session-1", status: "completed" });
+    vi.mocked(loadOwnedSession).mockResolvedValue(activeSession);
+    vi.mocked(completeSession).mockResolvedValue(completedSession);
 
     const response = await POST(context);
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ id: "session-1", status: "completed" });
+    await expect(response.json()).resolves.toEqual(completedSession);
     expect(completeSession).toHaveBeenCalledWith(expect.any(Object), "11111111-1111-4111-a111-111111111111");
   });
 });

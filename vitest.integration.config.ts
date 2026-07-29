@@ -15,5 +15,11 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/integration/**/*.test.ts"],
+    // Every integration test file seeds/tears down the same two hardcoded identities via
+    // tests/integration/fixtures/two-users.ts (setupTwoUsers/teardownTwoUsers) against one shared
+    // local Supabase instance. Running files in parallel workers races two independent
+    // create-user/sign-in/delete-user sequences against the same auth.users rows, surfacing as
+    // spurious "Database error creating/granting user" failures unrelated to the code under test.
+    fileParallelism: false,
   },
 });

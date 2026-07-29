@@ -76,7 +76,7 @@ orchestrator updates Status as artifacts appear on disk.
 | #   | Phase name                                      | Goal (one line)                                                                                                          | Risks covered | Test types         | Status      | Change folder                                                      |
 | --- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- | ------------------ | ----------- | ------------------------------------------------------------------ |
 | 1   | API + authorization safety net                  | Defend the highest-churn, highest-impact boundary: input validation and cross-user access control                        | #1, #2        | unit + integration | complete    | `context/archive/2026-07-24-testing-api-authorization-safety-net/` |
-| 2   | Critical-path data integrity                    | Prove the north-star session-logging flow persists data and the service layer the team trusts least behaves correctly    | #3, #5        | unit + integration | not started | —                                                                  |
+| 2   | Critical-path data integrity                    | Prove the north-star session-logging flow persists data and the service layer the team trusts least behaves correctly    | #3, #5        | unit + integration | complete    | `context/changes/testing-critical-path-data-integrity/`            |
 | 3   | AI generation safety net + upcoming route guard | Catch malformed AI output before persistence and future-proof the protected-route list ahead of workout-history shipping | #4, #6        | unit + integration | not started | —                                                                  |
 | 4   | Quality-gates wiring                            | Lock unit+integration and critical-flow e2e into CI as required gates                                                    | cross-cutting | gates              | not started | —                                                                  |
 
@@ -113,7 +113,7 @@ phase lands; before that, the gate is `planned`.
 | --------------------------- | --------------------------------------- | ---------------------------------------------------------------- | -------------------------------------- |
 | lint + typecheck            | local + CI (`.github/workflows/ci.yml`) | required (already wired)                                         | syntactic / type drift                 |
 | unit + integration          | local + CI                              | required after §3 Phase 1                                        | logic and authorization regressions    |
-| e2e on critical flows       | CI on PR                                | required after §3 Phase 2                                        | broken north-star session-logging path |
+| e2e on critical flows       | CI on PR                                | required (already wired)                                         | broken north-star session-logging path |
 | post-edit hook              | local (agent loop)                      | recommended — configured in Module 3 Lesson 3, out of scope here | regressions at edit time               |
 | visual diff (deterministic) | CI on PR                                | optional                                                         | rendering regressions                  |
 | multimodal visual review    | CI on PR                                | optional                                                         | visual issues classic diff misses      |
@@ -137,6 +137,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 - **Location**: `tests/integration/`, config `vitest.integration.config.ts`, script `npm run test:integration`. Structurally separate from the unit path — `npm run test`'s `include` never picks these up.
 - **Fixture**: `tests/integration/fixtures/two-users.ts` seeds two real, authenticated identities (`setupTwoUsers()` → `{ userA, userB }`, each `{ id, sessionId, client }`) against a live local Supabase instance via the service-role admin API; each identity gets its own anon-key `SupabaseClient` signed in via `signInWithPassword` (session state does not leak between identities). Call `teardownTwoUsers()` in `afterAll` — deletes are scoped to the fixture's own generated emails only, per the lessons-learned rule on exact-identifier-scoped fixture cleanup. Env vars: `INTEGRATION_SUPABASE_URL`, `INTEGRATION_SUPABASE_ANON_KEY`, `INTEGRATION_SUPABASE_SERVICE_ROLE_KEY` (from `supabase status -o env`; wired automatically in CI).
 - **Reference test**: `tests/integration/session-ownership-rls.test.ts` (`beforeAll`/`afterAll` fixture setup + one `describe` block per function under test).
+- **DB constraint/race a mock would lie about**: `tests/integration/restart-session-race.test.ts` is the second reference for this pattern — two genuinely concurrent RPC calls via `Promise.all` on the same client, proving a real Postgres-level unique-constraint race fix holds. A hermetic mock cannot exercise a fix living entirely inside a SQL function body's `EXCEPTION WHEN unique_violation` handler.
 - **Run locally**: `npx supabase start`, then `npm run test:integration`.
 
 ### 6.3 Adding an e2e test
@@ -144,6 +145,7 @@ the relevant rollout phase ships; before that, the sub-section reads
 - **Location**: `tests/e2e/`.
 - **Naming**: `<flow>.spec.ts`.
 - **Reference test**: `tests/e2e/workout-session.spec.ts`.
+- **Failure-simulation via route interception**: `tests/e2e/workout-session-save-failure.spec.ts` is the reference for simulating a backend failure without touching the server — `page.route("**/sets", ...)` fulfills `PUT`/`POST` with a `500` so the real client-side retry/backoff/banner logic runs against a controlled failure, no server-side stubbing needed. Has a real ~4-5s wall-clock floor (debounce + exponential backoff) — do not fake timers in a Playwright context.
 - **Run locally**: `npx playwright test`.
 
 ### 6.4 Adding a test for a new API endpoint
@@ -160,7 +162,8 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.6 Per-rollout-phase notes
 
-(Filled in as each phase lands.)
+- **Phase 2 (Risk #5, `plan.ts`/`profile.ts`)**: `src/lib/services/plan.test.ts` is the reference for testing pure business-rule functions with hand-built fixtures (no query-builder mock needed) — narrow-equipment guard and candidate/tracking-type re-validation. `src/lib/services/profile.test.ts` is the reference for a 100%-I/O-bound service file, reusing the `createQueryBuilder`/direct-`rpc`-mock conventions from `session.test.ts`. Both extend into their route tests (`api/plan.test.ts`, `api/profile.test.ts`, `api/profile/reset.test.ts`) via `vi.mock` per dependency module, asserting the full branch set rather than only the `401`/redirect case.
+- **Phase 2 (Risk #3, session-logging autosave)**: `src/pages/api/sessions/[sessionId]/sets.test.ts` is the reference for full route-branch coverage using `vi.mock("@/lib/services/session", async (importOriginal) => ...)` — spread the real module's exports and override only the functions under test, keeping `loadOwnedSession`'s real ownership-matching logic intact rather than re-mocking it. `tests/integration/restart-session-race.test.ts` and `tests/e2e/workout-session-save-failure.spec.ts` are the references noted in §6.2/§6.3 above.
 
 ## 7. What We Deliberately Don't Test
 

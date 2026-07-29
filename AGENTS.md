@@ -10,6 +10,7 @@ FlowFit is a fitness-tracking web app built on Astro 6 SSR with React 19 islands
 - Do not use Next.js directives (`"use client"`, `"use server"`) — this is Astro, not Next.js.
 - Use `cn()` from `@/lib/utils` for all conditional or merged Tailwind class strings; never concatenate class strings manually.
 - Add new protected paths to `PROTECTED_ROUTES` in `src/middleware.ts` — omitting it leaves the route unauthenticated.
+- Never run `npx supabase db reset` against the shared local dev stack to "verify a migration applies cleanly" — it wipes the entire Postgres volume, including every `auth.users` row, and this stack is shared across all worktrees (same `project_id`/ports in `supabase/config.toml`). To verify a new migration applies without destroying data, use `npx supabase migration up` instead. Only run `db reset` when the user explicitly asks for it, understanding it deletes all local data.
 
 ## Project Structure
 

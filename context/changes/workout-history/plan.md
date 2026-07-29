@@ -213,26 +213,26 @@ Implement the paginated, styled history page at `/history` with a premium cosmic
 - [x] 1.4 Add route protection in middleware — e47f282
 
 #### Manual
-- [ ] 1.5 Verify auth redirects for protected history route
+- [x] 1.5 Verify auth redirects for protected history route
 
 ### Phase 2: Navigation & Flow Redirection
 
 #### Automated
-- [x] 2.1 Add navigation link in Topbar
-- [x] 2.2 Add Topbar to Dashboard page
-- [x] 2.3 Update redirect target in SessionLogger
+- [x] 2.1 Add navigation link in Topbar — da47217
+- [x] 2.2 Add Topbar to Dashboard page — da47217
+- [x] 2.3 Update redirect target in SessionLogger — da47217
 
 #### Manual
-- [ ] 2.4 Verify Topbar layout on Dashboard
-- [ ] 2.5 Verify redirect upon session completion
+- [x] 2.4 Verify Topbar layout on Dashboard
+- [x] 2.5 Verify redirect upon session completion
 
 ### Phase 3: Chronological History Page
 
 #### Automated
-- [ ] 3.1 Create history page with server-side pagination
-- [ ] 3.2 Ensure type checking and linting pass
+- [x] 3.1 Create history page with server-side pagination
+- [x] 3.2 Ensure type checking and linting pass
 
 #### Manual
-- [ ] 3.3 Verify chronological layout, duration formatting, and badges
-- [ ] 3.4 Verify pagination controls functional
-- [ ] 3.5 Verify empty state CTA redirect
+- [x] 3.3 Verify chronological layout, duration formatting, and badges
+- [x] 3.4 Verify pagination controls functional
+- [x] 3.5 Verify empty state CTA redirect

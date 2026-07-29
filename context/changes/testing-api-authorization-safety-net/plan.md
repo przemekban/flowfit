@@ -343,8 +343,8 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [x] 5.1 `npm run format` produces no diff on the edited markdown
+- [x] 5.1 `npm run format` produces no diff on the edited markdown — e59a757
 
 #### Manual
 
-- [x] 5.2 §6.1/6.2/6.4/6.5 each point to a real, existing file from Phases 1-4
+- [x] 5.2 §6.1/6.2/6.4/6.5 each point to a real, existing file from Phases 1-4 — e59a757

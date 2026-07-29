@@ -1,30 +1,16 @@
 import type { APIRoute } from "astro";
-import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase";
-import { getSessionWithSets, getWorkoutWithExercises, getLastLoggedSets, restartSession } from "@/lib/services/session";
+import {
+  getSessionWithSets,
+  getWorkoutWithExercises,
+  getLastLoggedSets,
+  restartSession,
+  loadOwnedSession,
+} from "@/lib/services/session";
 import type { WorkoutSessionWithSets } from "@/types";
 
 export const prerender = false;
-
-function isPostgrestError(err: unknown): err is PostgrestError {
-  return typeof err === "object" && err !== null && "code" in err;
-}
-
-async function loadOwnedSession(
-  supabase: SupabaseClient,
-  sessionId: string,
-  userId: string,
-): Promise<WorkoutSessionWithSets | null> {
-  try {
-    const session = await getSessionWithSets(supabase, sessionId);
-    return session.user_id === userId ? session : null;
-  } catch (err) {
-    if (isPostgrestError(err) && err.code === "PGRST116") {
-      return null;
-    }
-    throw err;
-  }
-}
 
 export const POST: APIRoute = async (context) => {
   if (!context.locals.user) {
@@ -32,10 +18,11 @@ export const POST: APIRoute = async (context) => {
   }
   const userId = context.locals.user.id;
 
-  const existingSessionId = context.params.sessionId;
-  if (!existingSessionId) {
-    return Response.json({ error: "not_found" }, { status: 404 });
+  const sessionIdResult = z.uuid().safeParse(context.params.sessionId);
+  if (!sessionIdResult.success) {
+    return Response.json({ error: "validation_error", message: "sessionId must be a UUID" }, { status: 400 });
   }
+  const existingSessionId = sessionIdResult.data;
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
@@ -44,7 +31,7 @@ export const POST: APIRoute = async (context) => {
 
   let existingSession: WorkoutSessionWithSets | null;
   try {
-    existingSession = await loadOwnedSession(supabase, existingSessionId, userId);
+    existingSession = await loadOwnedSession(() => getSessionWithSets(supabase, existingSessionId), userId);
   } catch (err) {
     console.error("Failed to load session", { userId, sessionId: existingSessionId, cause: err });
     return Response.json({ error: "db_error" }, { status: 500 });

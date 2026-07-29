@@ -1,30 +1,10 @@
 import type { APIRoute } from "astro";
-import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase";
-import { getSessionWithSets, completeSession } from "@/lib/services/session";
+import { getSessionWithSets, completeSession, loadOwnedSession } from "@/lib/services/session";
 import type { WorkoutSessionWithSets } from "@/types";
 
 export const prerender = false;
-
-function isPostgrestError(err: unknown): err is PostgrestError {
-  return typeof err === "object" && err !== null && "code" in err;
-}
-
-async function loadOwnedSession(
-  supabase: SupabaseClient,
-  sessionId: string,
-  userId: string,
-): Promise<WorkoutSessionWithSets | null> {
-  try {
-    const session = await getSessionWithSets(supabase, sessionId);
-    return session.user_id === userId ? session : null;
-  } catch (err) {
-    if (isPostgrestError(err) && err.code === "PGRST116") {
-      return null;
-    }
-    throw err;
-  }
-}
 
 export const POST: APIRoute = async (context) => {
   if (!context.locals.user) {
@@ -32,10 +12,11 @@ export const POST: APIRoute = async (context) => {
   }
   const userId = context.locals.user.id;
 
-  const sessionId = context.params.sessionId;
-  if (!sessionId) {
-    return Response.json({ error: "not_found" }, { status: 404 });
+  const sessionIdResult = z.uuid().safeParse(context.params.sessionId);
+  if (!sessionIdResult.success) {
+    return Response.json({ error: "validation_error", message: "sessionId must be a UUID" }, { status: 400 });
   }
+  const sessionId = sessionIdResult.data;
 
   const supabase = createClient(context.request.headers, context.cookies);
   if (!supabase) {
@@ -44,7 +25,7 @@ export const POST: APIRoute = async (context) => {
 
   let session: WorkoutSessionWithSets | null;
   try {
-    session = await loadOwnedSession(supabase, sessionId, userId);
+    session = await loadOwnedSession(() => getSessionWithSets(supabase, sessionId), userId);
   } catch (err) {
     console.error("Failed to load session", { userId, sessionId, cause: err });
     return Response.json({ error: "db_error" }, { status: 500 });

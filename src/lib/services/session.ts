@@ -108,6 +108,25 @@ export async function createSession(
   return data;
 }
 
+function isPostgrestError(err: unknown): err is PostgrestError {
+  return typeof err === "object" && err !== null && "code" in err;
+}
+
+export async function loadOwnedSession<T extends { user_id: string }>(
+  loader: () => Promise<T>,
+  userId: string,
+): Promise<T | null> {
+  try {
+    const session = await loader();
+    return session.user_id === userId ? session : null;
+  } catch (err) {
+    if (isPostgrestError(err) && err.code === "PGRST116") {
+      return null;
+    }
+    throw err;
+  }
+}
+
 export async function getSessionOwnership(supabase: SupabaseClient, sessionId: string): Promise<WorkoutSession> {
   const { data, error } = (await supabase
     .from("workout_sessions")

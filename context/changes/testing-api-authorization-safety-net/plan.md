@@ -317,9 +317,9 @@ No database schema changes. `sessionId` format validation (`400` instead of `500
 
 #### Automated
 
-- [ ] 3.1 `npm run test` passes with all new/extended unit tests
-- [ ] 3.2 `npm run lint` passes, no duplicated `isPostgrestError`/`loadOwnedSession` remain
-- [ ] 3.3 `npm run build` succeeds
+- [x] 3.1 `npm run test` passes with all new/extended unit tests
+- [x] 3.2 `npm run lint` passes, no duplicated `isPostgrestError`/`loadOwnedSession` remain
+- [x] 3.3 `npm run build` succeeds
 
 #### Manual
 

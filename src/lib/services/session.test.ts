@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WorkoutSession, WorkoutSet } from "@/types";
-import { createSession, deleteSet, getLastLoggedSets, restartSession, upsertSet } from "./session";
+import { createSession, deleteSet, getLastLoggedSets, loadOwnedSession, restartSession, upsertSet } from "./session";
 
 interface QueryResult {
   data: unknown;
@@ -140,6 +140,40 @@ describe("createSession", () => {
     expect(builder.single).toHaveBeenCalled();
     expect(builder.maybeSingle).toHaveBeenCalled();
     expect(result).toEqual(existingSession);
+  });
+});
+
+describe("loadOwnedSession", () => {
+  it("returns the row when the loader's user_id matches the caller", async () => {
+    const loader = vi.fn(() => Promise.resolve(existingSession));
+
+    const result = await loadOwnedSession(loader, "user-1");
+
+    expect(result).toEqual(existingSession);
+  });
+
+  it("returns null when the loader's user_id does not match the caller", async () => {
+    const loader = vi.fn(() => Promise.resolve(existingSession));
+
+    const result = await loadOwnedSession(loader, "user-2");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the loader rejects with a PGRST116 not-found error", async () => {
+    const notFoundError = Object.assign(new Error("no rows returned"), { code: "PGRST116" });
+    const loader = vi.fn(() => Promise.reject(notFoundError));
+
+    const result = await loadOwnedSession(loader, "user-1");
+
+    expect(result).toBeNull();
+  });
+
+  it("rethrows any error that is not a PGRST116 PostgrestError", async () => {
+    const dbError = Object.assign(new Error("connection reset"), { code: "500" });
+    const loader = vi.fn(() => Promise.reject(dbError));
+
+    await expect(loadOwnedSession(loader, "user-1")).rejects.toEqual(dbError);
   });
 });
 

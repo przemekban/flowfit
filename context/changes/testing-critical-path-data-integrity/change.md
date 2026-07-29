@@ -1,7 +1,7 @@
 ---
 change_id: testing-critical-path-data-integrity
 title: Critical-path data integrity test rollout (Phase 2)
-status: implementing
+status: implemented
 created: 2026-07-29
 updated: 2026-07-29
 archived_at: null

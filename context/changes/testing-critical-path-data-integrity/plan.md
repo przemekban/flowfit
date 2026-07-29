@@ -261,7 +261,7 @@ N/A — no schema or data migration in this phase; the one new fixture field (`w
 
 #### Manual
 
-- [x] 1.4 Narrow-equipment onboarding smoke test in dev shows a clear failure message
+- [x] 1.4 Narrow-equipment onboarding smoke test in dev shows a clear failure message — 3616deb
 
 ### Phase 2: Risk #3 — session-logging autosave safety net + gate sync
 
@@ -275,6 +275,6 @@ N/A — no schema or data migration in this phase; the one new fixture field (`w
 
 #### Manual
 
-- [x] 2.6 Devtools-blocked autosave shows banner after retries exhaust, value preserved
-- [x] 2.7 Double-click "Start Over" results in exactly one session
-- [ ] 2.8 `test-plan.md` §5 e2e row reads `required (already wired)`, CI green end-to-end
+- [x] 2.6 Devtools-blocked autosave shows banner after retries exhaust, value preserved — 3616deb
+- [x] 2.7 Double-click "Start Over" results in exactly one session — 3616deb
+- [x] 2.8 `test-plan.md` §5 e2e row reads `required (already wired)`, CI green end-to-end — a51d55e

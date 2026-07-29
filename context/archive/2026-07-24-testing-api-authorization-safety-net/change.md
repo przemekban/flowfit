@@ -1,10 +1,10 @@
 ---
 change_id: testing-api-authorization-safety-net
 title: Api authorization safety net
-status: impl_reviewed
+status: archived
 created: 2026-07-24
 updated: 2026-07-29
-archived_at: null
+archived_at: 2026-07-29T16:54:33Z
 ---
 
 ## Notes

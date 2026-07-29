@@ -255,9 +255,9 @@ N/A — no schema or data migration in this phase; the one new fixture field (`w
 
 #### Automated
 
-- [x] 1.1 `npm run test` passes
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` passes
+- [x] 1.1 `npm run test` passes — 8dbacae
+- [x] 1.2 `npm run lint` passes — 8dbacae
+- [x] 1.3 `npm run build` passes — 8dbacae
 
 #### Manual
 
@@ -267,11 +267,11 @@ N/A — no schema or data migration in this phase; the one new fixture field (`w
 
 #### Automated
 
-- [ ] 2.1 `npm run test` passes
-- [ ] 2.2 `npx supabase start && npm run test:integration` passes
-- [ ] 2.3 `npm run test:e2e` passes
-- [ ] 2.4 `npm run lint` passes
-- [ ] 2.5 `npm run build` passes
+- [x] 2.1 `npm run test` passes
+- [x] 2.2 `npx supabase start && npm run test:integration` passes
+- [x] 2.3 `npm run test:e2e` passes
+- [x] 2.4 `npm run lint` passes
+- [x] 2.5 `npm run build` passes
 
 #### Manual
 

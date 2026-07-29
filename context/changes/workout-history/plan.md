@@ -207,10 +207,10 @@ Implement the paginated, styled history page at `/history` with a premium cosmic
 ### Phase 1: Backend Service & Route Protection
 
 #### Automated
-- [x] 1.1 Write getWorkoutSessionHistory integration tests (TDD)
-- [x] 1.2 Write getWorkoutSessionHistory unit tests (TDD)
-- [x] 1.3 Implement getWorkoutSessionHistory service function (make tests pass)
-- [x] 1.4 Add route protection in middleware
+- [x] 1.1 Write getWorkoutSessionHistory integration tests (TDD) — e47f282
+- [x] 1.2 Write getWorkoutSessionHistory unit tests (TDD) — e47f282
+- [x] 1.3 Implement getWorkoutSessionHistory service function (make tests pass) — e47f282
+- [x] 1.4 Add route protection in middleware — e47f282
 
 #### Manual
 - [ ] 1.5 Verify auth redirects for protected history route
@@ -218,9 +218,9 @@ Implement the paginated, styled history page at `/history` with a premium cosmic
 ### Phase 2: Navigation & Flow Redirection
 
 #### Automated
-- [ ] 2.1 Add navigation link in Topbar
-- [ ] 2.2 Add Topbar to Dashboard page
-- [ ] 2.3 Update redirect target in SessionLogger
+- [x] 2.1 Add navigation link in Topbar
+- [x] 2.2 Add Topbar to Dashboard page
+- [x] 2.3 Update redirect target in SessionLogger
 
 #### Manual
 - [ ] 2.4 Verify Topbar layout on Dashboard

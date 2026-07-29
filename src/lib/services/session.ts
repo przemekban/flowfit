@@ -183,6 +183,45 @@ export async function getSessionWithSets(supabase: SupabaseClient, sessionId: st
   };
 }
 
+export async function getWorkoutSessionHistory(
+  supabase: SupabaseClient,
+  userId: string,
+  limit: number,
+  offset: number,
+): Promise<{ sessions: WorkoutSessionWithSets[]; hasMore: boolean }> {
+  const { data, error } = (await supabase
+    .from("workout_sessions")
+    .select(
+      `
+      id, user_id, workout_id, status, started_at, completed_at,
+      workouts ( * ),
+      workout_sets ( *, exercises ( * ) )
+    `,
+    )
+    .eq("user_id", userId)
+    .in("status", ["completed", "abandoned"])
+    .order("started_at", { ascending: false })
+    .order("set_number", { referencedTable: "workout_sets", ascending: true })
+    .range(offset, offset + limit)) as {
+    data: SessionWithSetsRow[] | null;
+    error: PostgrestError | null;
+  };
+
+  if (error) {
+    throw error;
+  }
+
+  const rows = data ?? [];
+  const hasMore = rows.length > limit;
+  const sessions = rows.slice(0, limit).map(({ workouts, workout_sets, ...session }) => ({
+    ...session,
+    workout: workouts,
+    sets: workout_sets.map(({ exercises, ...set }) => ({ ...set, exercise: exercises })),
+  }));
+
+  return { sessions, hasMore };
+}
+
 export async function getLastLoggedSets(
   supabase: SupabaseClient,
   userId: string,

@@ -15,5 +15,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/integration/**/*.test.ts"],
+    // Files share fixture state against one real local Supabase instance (tests/integration/fixtures/two-users.ts
+    // seeds fixed emails); running files in parallel workers races two setupTwoUsers() calls against each other.
+    fileParallelism: false,
   },
 });

@@ -94,7 +94,7 @@ export default function SessionLogger({ workout, session, lastLoggedSets, needsC
         setFinishing(false);
         return;
       }
-      window.location.href = "/dashboard";
+      window.location.href = "/history";
     } catch {
       setFinishing(false);
     }

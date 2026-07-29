@@ -15,6 +15,7 @@ export interface TestIdentity {
   id: string;
   sessionId: string;
   workoutId: string;
+  exerciseId: string;
   client: SupabaseClient;
 }
 
@@ -91,17 +92,64 @@ async function seedUser(admin: SupabaseClient, url: string, anonKey: string, lab
   const { error: signInError } = await client.auth.signInWithPassword({ email, password: PASSWORD });
   if (signInError) throw signInError;
 
-  return { id: userId, sessionId: session.id, workoutId: workout.id, client };
+  return { id: userId, sessionId: session.id, workoutId: workout.id, exerciseId: exercise.id, client };
 }
 
-export async function setupTwoUsers(): Promise<{ userA: TestIdentity; userB: TestIdentity }> {
+export async function setupTwoUsers(): Promise<{ userA: TestIdentity; userB: TestIdentity; admin: SupabaseClient }> {
   const { url, anonKey, serviceRoleKey } = requireEnv();
   const admin = createClient(url, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
   const userA = await seedUser(admin, url, anonKey, "a");
   const userB = await seedUser(admin, url, anonKey, "b");
 
-  return { userA, userB };
+  return { userA, userB, admin };
+}
+
+export interface SeedSessionParams {
+  userId: string;
+  workoutId: string;
+  status: "active" | "completed" | "abandoned";
+  startedAt: string;
+  completedAt?: string | null;
+}
+
+// Inserts additional workout_sessions rows beyond the one seedUser() creates, so tests can
+// exercise history filtering/sorting/pagination against known statuses and timestamps. Cleanup
+// is covered by teardownTwoUsers()'s user deletion cascading onto workout_sessions.user_id.
+export async function seedSession(admin: SupabaseClient, params: SeedSessionParams): Promise<string> {
+  const { data, error } = (await admin
+    .from("workout_sessions")
+    .insert({
+      user_id: params.userId,
+      workout_id: params.workoutId,
+      status: params.status,
+      started_at: params.startedAt,
+      completed_at: params.completedAt ?? null,
+    })
+    .select("id")
+    .single()) as { data: { id: string } | null; error: PostgrestError | null };
+  if (error) throw error;
+  if (!data) throw new Error("Insert succeeded but no session row was returned");
+  return data.id;
+}
+
+export interface SeedSetParams {
+  sessionId: string;
+  exerciseId: string;
+  setNumber: number;
+  reps?: number;
+  weightKg?: number;
+}
+
+export async function seedSet(admin: SupabaseClient, params: SeedSetParams): Promise<void> {
+  const { error } = await admin.from("workout_sets").insert({
+    workout_session_id: params.sessionId,
+    exercise_id: params.exerciseId,
+    set_number: params.setNumber,
+    reps: params.reps ?? 10,
+    weight_kg: params.weightKg ?? 20,
+  });
+  if (error) throw error;
 }
 
 export async function teardownTwoUsers(): Promise<void> {

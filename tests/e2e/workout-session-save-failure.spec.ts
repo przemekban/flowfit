@@ -44,5 +44,5 @@ test("autosave failure after retries exhaust preserves the typed value and shows
   // Finish the workout so this session doesn't linger as "active" for the next spec — /complete
   // isn't covered by the /sets route interceptor above, so this hits the real endpoint.
   await page.getByRole("button", { name: "Finish workout" }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page).toHaveURL(/\/history/);
 });

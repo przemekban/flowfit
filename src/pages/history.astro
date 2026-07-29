@@ -1,0 +1,143 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Topbar from "@/components/Topbar.astro";
+import { createClient } from "@/lib/supabase";
+import { getWorkoutSessionHistory } from "@/lib/services/session";
+import { buttonVariants } from "@/components/ui/button";
+import type { WorkoutSessionWithSets } from "@/types";
+
+const PAGE_SIZE = 10;
+
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/auth/signin");
+}
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+if (!supabase) {
+  return new Response("Supabase is not configured", { status: 500 });
+}
+
+const rawPage = Number(Astro.url.searchParams.get("page") ?? "1");
+const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+const offset = (page - 1) * PAGE_SIZE;
+
+const { sessions, hasMore } = await getWorkoutSessionHistory(supabase, user.id, PAGE_SIZE, offset);
+
+const prevPage = page > 1 ? page - 1 : null;
+const nextPage = hasMore ? page + 1 : null;
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatDuration(session: WorkoutSessionWithSets): string {
+  if (session.status !== "completed" || !session.completed_at) {
+    return "Abandoned";
+  }
+  const elapsedMs = new Date(session.completed_at).getTime() - new Date(session.started_at).getTime();
+  const totalMinutes = Math.max(0, Math.round(elapsedMs / 60_000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+}
+
+function formatSetValue(set: WorkoutSessionWithSets["sets"][number]): string {
+  if (set.duration_seconds != null) {
+    return `${set.duration_seconds}s`;
+  }
+  const reps = set.reps != null ? `${set.reps} reps` : "";
+  const weight = set.weight_kg != null ? ` × ${set.weight_kg}kg` : "";
+  return `${reps}${weight}`;
+}
+---
+
+<Layout title="Workout History">
+  <div class="bg-cosmic flex min-h-screen flex-col items-center gap-6 p-4">
+    <div class="w-full max-w-2xl">
+      <Topbar />
+    </div>
+
+    <div class="w-full max-w-2xl">
+      <h1 class="mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
+        Workout History
+      </h1>
+
+      {
+        sessions.length === 0 ? (
+          <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
+            <p class="text-blue-100/80">You haven't logged any workouts yet.</p>
+            <a href="/dashboard" class:list={[buttonVariants({ size: "sm" }), "mt-4"]}>
+              Back to Dashboard
+            </a>
+          </div>
+        ) : (
+          <div class="space-y-4">
+            {sessions.map((session) => (
+              <div class="rounded-2xl border border-white/10 bg-white/10 p-6 text-left text-white backdrop-blur-xl">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <h2 class="text-lg font-semibold text-white">{session.workout.name}</h2>
+                    <p class="mt-1 text-sm text-blue-100/60">{formatDate(session.started_at)}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-blue-100/80">
+                      {formatDuration(session)}
+                    </span>
+                    {session.status === "completed" ? (
+                      <span class="rounded-full border border-green-500/30 bg-green-900/30 px-3 py-1 text-xs text-green-300">
+                        Completed
+                      </span>
+                    ) : (
+                      <span class="rounded-full border border-amber-500/30 bg-amber-900/30 px-3 py-1 text-xs text-amber-300">
+                        Abandoned
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <ul class="mt-4 space-y-2">
+                  {session.sets.map((set) => (
+                    <li class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-blue-100/90">
+                      <span>
+                        {set.exercise.name} · Set {set.set_number}
+                      </span>
+                      <span class="text-blue-100/60">{formatSetValue(set)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        (prevPage !== null || nextPage !== null) && (
+          <div class="mt-6 flex items-center justify-between">
+            {prevPage !== null ? (
+              <a href={`/history?page=${prevPage}`} class:list={[buttonVariants({ variant: "outline", size: "sm" })]}>
+                Previous
+              </a>
+            ) : (
+              <span />
+            )}
+            {nextPage !== null ? (
+              <a href={`/history?page=${nextPage}`} class:list={[buttonVariants({ variant: "outline", size: "sm" })]}>
+                Next
+              </a>
+            ) : (
+              <span />
+            )}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</Layout>

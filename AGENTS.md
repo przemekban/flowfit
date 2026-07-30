@@ -57,4 +57,4 @@ Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` 
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on push and PR to `master`: `npm ci` → `astro sync` → `npm run lint` → `npm run build`. Both lint and build must pass before merging. No automated test suite is configured.
+GitHub Actions (`.github/workflows/ci.yml`) runs on push and PR to `main`: `npm ci` → `astro sync` → `npm run lint` → `npm run test` (unit) → `npm run test:integration` (against a local Supabase instance) → `npm run test:e2e` (Playwright) → `npm run build`. The `ci` job is a required branch-protection status check on `main` — merging requires an up-to-date PR with a passing `ci` run; direct pushes to `main` are blocked, including for admins. A separate `deploy` job runs after `ci` succeeds on push to `main`.

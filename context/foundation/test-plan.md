@@ -73,12 +73,12 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name                                      | Goal (one line)                                                                                                          | Risks covered | Test types         | Status      | Change folder                                                      |
-| --- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- | ------------------ | ----------- | ------------------------------------------------------------------ |
-| 1   | API + authorization safety net                  | Defend the highest-churn, highest-impact boundary: input validation and cross-user access control                        | #1, #2        | unit + integration | complete    | `context/archive/2026-07-24-testing-api-authorization-safety-net/` |
-| 2   | Critical-path data integrity                    | Prove the north-star session-logging flow persists data and the service layer the team trusts least behaves correctly    | #3, #5        | unit + integration | complete    | `context/archive/2026-07-29-testing-critical-path-data-integrity/` |
-| 3   | AI generation safety net + upcoming route guard | Catch malformed AI output before persistence and future-proof the protected-route list ahead of workout-history shipping | #4, #6        | unit + integration | complete    | `context/changes/testing-ai-generation-safety-net-and-route-guard/` |
-| 4   | Quality-gates wiring                            | Lock unit+integration and critical-flow e2e into CI as required gates                                                    | cross-cutting | gates              | not started | —                                                                  |
+| #   | Phase name                                      | Goal (one line)                                                                                                          | Risks covered | Test types         | Status   | Change folder                                                       |
+| --- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- | ------------------ | -------- | ------------------------------------------------------------------- |
+| 1   | API + authorization safety net                  | Defend the highest-churn, highest-impact boundary: input validation and cross-user access control                        | #1, #2        | unit + integration | complete | `context/archive/2026-07-24-testing-api-authorization-safety-net/`  |
+| 2   | Critical-path data integrity                    | Prove the north-star session-logging flow persists data and the service layer the team trusts least behaves correctly    | #3, #5        | unit + integration | complete | `context/archive/2026-07-29-testing-critical-path-data-integrity/`  |
+| 3   | AI generation safety net + upcoming route guard | Catch malformed AI output before persistence and future-proof the protected-route list ahead of workout-history shipping | #4, #6        | unit + integration | complete | `context/changes/testing-ai-generation-safety-net-and-route-guard/` |
+| 4   | Quality-gates wiring                            | Lock unit+integration and critical-flow e2e into CI as required gates                                                    | cross-cutting | gates              | complete | `context/changes/quality-gates-wiring/`                             |
 
 3–5 rollout phases. No AI-native testing layer is included: this is a solo, small-scale, 3-week-after-hours MVP where every risk in §2 is caught more cheaply by deterministic fixture-based tests than by an AI-native review layer — see §4 for the explicit cost×signal call.
 
@@ -111,9 +111,9 @@ phase lands; before that, the gate is `planned`.
 
 | Gate                        | Where                                   | Required?                                                        | Catches                                |
 | --------------------------- | --------------------------------------- | ---------------------------------------------------------------- | -------------------------------------- |
-| lint + typecheck            | local + CI (`.github/workflows/ci.yml`) | required (already wired)                                         | syntactic / type drift                 |
-| unit + integration          | local + CI                              | required after §3 Phase 1                                        | logic and authorization regressions    |
-| e2e on critical flows       | CI on PR                                | required (already wired)                                         | broken north-star session-logging path |
+| lint + typecheck            | local + CI (`.github/workflows/ci.yml`) | required — enforced via `main` branch protection (§3 Phase 4)    | syntactic / type drift                 |
+| unit + integration          | local + CI                              | required — enforced via `main` branch protection (§3 Phase 4)    | logic and authorization regressions    |
+| e2e on critical flows       | CI on PR                                | required — enforced via `main` branch protection (§3 Phase 4)    | broken north-star session-logging path |
 | post-edit hook              | local (agent loop)                      | recommended — configured in Module 3 Lesson 3, out of scope here | regressions at edit time               |
 | visual diff (deterministic) | CI on PR                                | optional                                                         | rendering regressions                  |
 | multimodal visual review    | CI on PR                                | optional                                                         | visual issues classic diff misses      |
@@ -167,6 +167,13 @@ the relevant rollout phase ships; before that, the sub-section reads
 - **Phase 3 (Risk #4, protected-route guard)**: `src/middleware.test.ts` is the reference for the source-derived route-list pattern — walk `src/pages` with `fs.readdirSync(dir, { recursive: true })` (Node 22, no glob dependency needed), exclude `pages/api/` and `pages/auth/`, and keep files whose source reads the authenticated user off `Astro.locals` (matching both the literal `Astro.locals.user` form and this codebase's actual `const { user } = Astro.locals;` destructuring form — the plan's original regex assumed only the former; the destructured form is what every current page actually uses). Feed the derived path list into `describe.each` so a future authenticated page shipping without a matching `PROTECTED_ROUTES` entry fails the test, rather than a hardcoded list only re-confirming today's routes. `PROFILE_REQUIRED_ROUTES` is hand-specified (not derivable from source) since "needs a profile" is a product decision.
 - **Phase 3 (Risk #6, Gemini response parsing)**: `src/lib/services/plan.test.ts`'s `generateTrainingPlan` "Gemini response handling" block is the reference for mocking a `GoogleGenAI` response body — the first precedent in this repo for stubbing `generateContent`'s resolved value rather than the whole client: `{ models: { generateContent: vi.fn().mockResolvedValue({ text: <fixture> }) } } as unknown as GoogleGenAI`. One golden-path fixture proves the index→UUID remap; five malformed-response fixtures (empty/undefined `.text`, invalid JSON, missing required field, out-of-range candidate index, non-UUID candidate id surfacing only at the post-remap re-validation layer) each assert `.rejects.toBeInstanceOf(PlanValidationError)`.
 
+### 6.7 Configuring/verifying the branch-protection gate
+
+- **Enforced Gate**: The branch protection on `main` requires the status check context `ci` to pass. This context is tied to the job key `ci` defined in `.github/workflows/ci.yml` (line 13).
+- **Configuration Details**: The gate requires a Pull Request to merge, blocks direct pushes to `main` (even for admins), and requires branches to be up-to-date before merging. No approving review count is required.
+- **Verification Command**: Run `gh api repos/przemekban/flowfit/branches/main/protection` to inspect active rules.
+- **Recreation/Payload**: See `context/changes/quality-gates-wiring/plan.md` (Phase 1) for the full JSON payload used to configure the gate.
+
 ## 7. What We Deliberately Don't Test
 
 Exclusions agreed during the rollout (Phase 2 interview, Q5). Future
@@ -178,7 +185,7 @@ contributors should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1–§5) last reviewed: 2026-07-24
+- Strategy (§1–§5) last reviewed: 2026-07-30
 - Stack versions last verified: 2026-07-24
 - AI-native tool references last verified: 2026-07-24 (none in use this rollout)
 

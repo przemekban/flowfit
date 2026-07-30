@@ -50,6 +50,11 @@ Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` 
 - Auth pages: `src/pages/auth/{signin,signup,confirm-email}.astro`
 - Env vars go in `.dev.vars` for Cloudflare local dev, `.env` for Node. See @README.md for full setup.
 
+## PRs & Issues
+
+- This repo's roadmap slices are tracked as GitHub Issues (see `context/foundation/roadmap.md` for the Change ID ↔ issue mapping). When a PR implements one, its body must include a closing keyword (`Closes #N`) so the issue auto-closes on merge — this has been missed more than once, leaving shipped work showing as an open issue.
+- If a PR already merged without the keyword, close the issue manually right away with a comment linking the PR (`gh issue close N --comment "Implemented and merged via #M."`).
+
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on push and PR to `master`: `npm ci` → `astro sync` → `npm run lint` → `npm run build`. Both lint and build must pass before merging. No automated test suite is configured.
+GitHub Actions (`.github/workflows/ci.yml`) runs on push and PR to `main`: `npm ci` → `astro sync` → `npm run lint` → `npm run test` (unit) → `npm run test:integration` (against a local Supabase instance) → `npm run test:e2e` (Playwright) → `npm run build`. The `ci` job is a required branch-protection status check on `main` — merging requires an up-to-date PR with a passing `ci` run; direct pushes to `main` are blocked, including for admins. A separate `deploy` job runs after `ci` succeeds on push to `main`.

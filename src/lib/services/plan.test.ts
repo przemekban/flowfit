@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { GoogleGenAI } from "@google/genai";
 import type { UserProfile } from "@/types";
 import {
@@ -33,6 +33,34 @@ function makeCandidate(overrides: Partial<CandidateExercise> = {}): CandidateExe
   };
 }
 
+function buildGeminiClient(responseText: string | undefined): GoogleGenAI {
+  return {
+    models: {
+      generateContent: vi.fn().mockResolvedValue({ text: responseText }),
+    },
+  } as unknown as GoogleGenAI;
+}
+
+const validUuids = [
+  "11111111-1111-4111-8111-111111111111",
+  "22222222-2222-4222-8222-222222222222",
+  "33333333-3333-4333-8333-333333333333",
+  "44444444-4444-4444-8444-444444444444",
+];
+
+function buildGenerationPayload(sessionsPerWeek: number, candidateCount: number) {
+  return {
+    workouts: Array.from({ length: sessionsPerWeek }, (_, workoutIndex) => ({
+      name: `Day ${workoutIndex + 1}`,
+      exercises: Array.from({ length: MIN_EXERCISES_PER_WORKOUT }, (_, i) => ({
+        id: i % candidateCount,
+        target_sets: 3,
+        target_reps: 10,
+      })),
+    })),
+  };
+}
+
 describe("generateTrainingPlan", () => {
   it("rejects with PlanValidationError and never touches the Gemini client when candidates is empty", async () => {
     const stubClient = {} as GoogleGenAI;
@@ -47,6 +75,71 @@ describe("generateTrainingPlan", () => {
     );
 
     await expect(generateTrainingPlan(stubClient, baseProfile, candidates)).rejects.toBeInstanceOf(PlanValidationError);
+  });
+
+  describe("Gemini response handling", () => {
+    const candidates = validUuids.map((id) => makeCandidate({ id }));
+    const profile: UserProfile = { ...baseProfile, sessions_per_week: 3 };
+
+    it("golden path: a well-formed response is parsed, remapped to real exercise_ids, and re-validated", async () => {
+      const payload = buildGenerationPayload(profile.sessions_per_week, candidates.length);
+      const client = buildGeminiClient(JSON.stringify(payload));
+
+      const result = await generateTrainingPlan(client, profile, candidates);
+
+      expect(result.workouts).toHaveLength(profile.sessions_per_week);
+      for (const workout of result.workouts) {
+        workout.exercises.forEach((exercise, exerciseIndex) => {
+          const candidateIndex = exerciseIndex % candidates.length;
+          expect(exercise.exercise_id).toBe(candidates[candidateIndex].id);
+        });
+      }
+    });
+
+    it("rejects with PlanValidationError when response.text is empty", async () => {
+      const client = buildGeminiClient("");
+
+      await expect(generateTrainingPlan(client, profile, candidates)).rejects.toBeInstanceOf(PlanValidationError);
+    });
+
+    it("rejects with PlanValidationError when response.text is undefined", async () => {
+      const client = buildGeminiClient(undefined);
+
+      await expect(generateTrainingPlan(client, profile, candidates)).rejects.toBeInstanceOf(PlanValidationError);
+    });
+
+    it("rejects with PlanValidationError when response.text is not valid JSON", async () => {
+      const client = buildGeminiClient("this is not json{");
+
+      await expect(generateTrainingPlan(client, profile, candidates)).rejects.toBeInstanceOf(PlanValidationError);
+    });
+
+    it("rejects with PlanValidationError when an exercise is missing a required field (target_sets)", async () => {
+      const payload = buildGenerationPayload(profile.sessions_per_week, candidates.length);
+      const { target_sets: _omitted, ...rest } = payload.workouts[0].exercises[0];
+      payload.workouts[0].exercises[0] = rest as (typeof payload.workouts)[0]["exercises"][0];
+      const client = buildGeminiClient(JSON.stringify(payload));
+
+      await expect(generateTrainingPlan(client, profile, candidates)).rejects.toBeInstanceOf(PlanValidationError);
+    });
+
+    it("rejects with PlanValidationError when an exercise references an out-of-range candidate index", async () => {
+      const payload = buildGenerationPayload(profile.sessions_per_week, candidates.length);
+      payload.workouts[0].exercises[0].id = candidates.length;
+      const client = buildGeminiClient(JSON.stringify(payload));
+
+      await expect(generateTrainingPlan(client, profile, candidates)).rejects.toBeInstanceOf(PlanValidationError);
+    });
+
+    it("rejects with PlanValidationError when the post-remap plan fails re-validation (candidate id is not a UUID)", async () => {
+      const candidatesWithInvalidId = [makeCandidate({ id: "not-a-uuid" }), ...candidates.slice(1)];
+      const payload = buildGenerationPayload(profile.sessions_per_week, candidatesWithInvalidId.length);
+      const client = buildGeminiClient(JSON.stringify(payload));
+
+      await expect(generateTrainingPlan(client, profile, candidatesWithInvalidId)).rejects.toBeInstanceOf(
+        PlanValidationError,
+      );
+    });
   });
 });
 

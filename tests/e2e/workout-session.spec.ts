@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { TEST_USER_EMAIL, TEST_USER_PASSWORD } from "./fixtures/seed";
+import { TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_WORKOUT_NAME } from "./fixtures/seed";
 
 test("launch, log a set, resume after reload, and finish a workout session", async ({ page }) => {
   await page.goto("/auth/signin");
@@ -15,8 +15,12 @@ test("launch, log a set, resume after reload, and finish a workout session", asy
   await expect(page).toHaveURL(/\/dashboard/);
 
   // First launch: no active session exists yet, so this must land directly in the logger
-  // with zero intermediate screens.
-  await page.getByRole("link", { name: "Start workout" }).click();
+  // with zero intermediate screens. Scoped by workout name since the fixture now seeds a second
+  // workout (for the progress-indicator spec), so a bare "Start workout" locator would be ambiguous.
+  await page
+    .locator("div.rounded-2xl", { hasText: TEST_WORKOUT_NAME })
+    .getByRole("link", { name: "Start workout" })
+    .click();
   await expect(page).toHaveURL(/\/session\//);
 
   // The session island (SessionLogger/SetRow) hydrates after the initial HTML paints; typing

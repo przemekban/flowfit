@@ -30,6 +30,7 @@ interface SetRowProps {
   onSaveFailed: () => void;
   onSaved: () => void;
   onPendingChange: (key: string, payload: PendingSetPayload | null) => void;
+  onValueSaved: (rowKey: string, exerciseId: string, payload: PendingSetPayload | null) => void;
 }
 
 export default function SetRow({
@@ -44,6 +45,7 @@ export default function SetRow({
   onSaveFailed,
   onSaved,
   onPendingChange,
+  onValueSaved,
 }: SetRowProps) {
   const [quantity, setQuantity] = useState(savedQuantity !== null ? String(savedQuantity) : "");
   const [weight, setWeight] = useState(savedWeightKg !== null ? String(savedWeightKg) : "");
@@ -94,7 +96,10 @@ export default function SetRow({
         hasFiredOnSavedRef.current = true;
         onSaved();
       }
-      if (isMountedRef.current) clearPending();
+      if (isMountedRef.current) {
+        onValueSaved(rowKey, exerciseId, payload);
+        clearPending();
+      }
     } catch {
       if (attempt < MAX_RETRIES) {
         const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
@@ -116,12 +121,15 @@ export default function SetRow({
       // keepalive lets this request finish even if the tab is being closed
       // (e.g. cleared right before navigate-away), since it isn't covered
       // by the beforeunload/sendBeacon fallback (sendBeacon only does POST).
-      await fetch(`/api/sessions/${sessionId}/sets`, {
+      const response = await fetch(`/api/sessions/${sessionId}/sets`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exercise_id: exerciseId, set_number: setNumber }),
         keepalive: true,
       });
+      if (response.ok) {
+        onValueSaved(rowKey, exerciseId, null);
+      }
     } catch {
       // best-effort; the row is already visibly cleared client-side
     }

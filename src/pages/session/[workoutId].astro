@@ -8,6 +8,7 @@ import {
   getSessionWithSets,
   getLastLoggedSets,
 } from "@/lib/services/session";
+import { getPreviousExerciseBests } from "@/lib/services/exercise-progress";
 import SessionLogger from "@/components/session/SessionLogger";
 
 const { user } = Astro.locals;
@@ -34,6 +35,7 @@ const activeSession = existingSession ?? (await createSession(supabase, user.id,
 const session = await getSessionWithSets(supabase, activeSession.id);
 const exerciseIds = workout.exercises.map((we) => we.exercise_id);
 const lastLoggedSets = await getLastLoggedSets(supabase, user.id, exerciseIds, session.id);
+const previousBests = await getPreviousExerciseBests(supabase, exerciseIds, session.id);
 ---
 
 <Layout title={`Session · ${workout.name}`}>
@@ -44,6 +46,7 @@ const lastLoggedSets = await getLastLoggedSets(supabase, user.id, exerciseIds, s
         workout={workout}
         session={session}
         lastLoggedSets={lastLoggedSets}
+        previousBests={previousBests}
         needsChoice={needsChoice}
       />
     </div>

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { TEST_USER_EMAIL, TEST_USER_PASSWORD } from "./fixtures/seed";
+import { TEST_USER_EMAIL, TEST_USER_PASSWORD, TEST_WORKOUT_NAME } from "./fixtures/seed";
 
 test("autosave failure after retries exhaust preserves the typed value and shows the failure banner", async ({
   page,
@@ -14,7 +14,12 @@ test("autosave failure after retries exhaust preserves the typed value and shows
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/dashboard/);
 
-  await page.getByRole("link", { name: "Start workout" }).click();
+  // Scoped by workout name since the fixture now seeds a second workout (for the progress-indicator
+  // spec), so a bare "Start workout" locator would be ambiguous.
+  await page
+    .locator("div.rounded-2xl", { hasText: TEST_WORKOUT_NAME })
+    .getByRole("link", { name: "Start workout" })
+    .click();
   await expect(page).toHaveURL(/\/session\//);
   await page.waitForLoadState("networkidle");
 

@@ -296,9 +296,9 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: `npx supabase migration up`
-- [ ] 1.2 Integration tests pass: `npm run test:integration`
-- [ ] 1.3 Linting passes: `npm run lint`
+- [x] 1.1 Migration applies cleanly: `npx supabase migration up`
+- [x] 1.2 Integration tests pass: `npm run test:integration`
+- [x] 1.3 Linting passes: `npm run lint`
 
 #### Manual
 

@@ -34,8 +34,10 @@ pnpm-debug.log*
 /playwright/.cache/
 
 
-.claude
+.claude/*
+!.claude/settings.json
 
 # scraper 
-scripts/
+scripts/*
+!scripts/post-tool-hook.cjs
 exercises-raw.json

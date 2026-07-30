@@ -8,6 +8,9 @@ const SERVICE_ROLE_KEY = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY;
 
 export const TEST_USER_EMAIL = "e2e-workout-session@flowfit.test";
 export const TEST_USER_PASSWORD = "e2e-test-password-123";
+export const TEST_WORKOUT_NAME = "E2E Seeded Workout";
+export const PROGRESS_WORKOUT_NAME = "E2E Progress Workout";
+export const PROGRESS_WORKOUT_PRIOR_BEST_WEIGHT_KG = 20;
 
 export default async function globalSetup(): Promise<void> {
   if (!SERVICE_ROLE_KEY) {
@@ -60,7 +63,7 @@ export default async function globalSetup(): Promise<void> {
 
   const { data: workout, error: workoutError } = await supabase
     .from("workouts")
-    .insert({ user_id: userId, name: "E2E Seeded Workout", source: "custom" })
+    .insert({ user_id: userId, name: TEST_WORKOUT_NAME, source: "custom" })
     .select("id")
     .single();
   if (workoutError) throw workoutError;
@@ -80,4 +83,51 @@ export default async function globalSetup(): Promise<void> {
     position: 1,
   });
   if (planError) throw planError;
+
+  // A second, independent workout for the progress-indicator spec, so it doesn't depend on run
+  // order relative to the other two specs' shared workout/session (playwright.config.ts:6-13).
+  const { data: progressWorkout, error: progressWorkoutError } = await supabase
+    .from("workouts")
+    .insert({ user_id: userId, name: PROGRESS_WORKOUT_NAME, source: "custom" })
+    .select("id")
+    .single();
+  if (progressWorkoutError) throw progressWorkoutError;
+
+  const { error: progressWorkoutExerciseError } = await supabase.from("workout_exercises").insert({
+    workout_id: progressWorkout.id,
+    exercise_id: exercise.id,
+    position: 1,
+    target_sets: 3,
+    target_reps: 10,
+  });
+  if (progressWorkoutExerciseError) throw progressWorkoutExerciseError;
+
+  const { error: progressPlanError } = await supabase.from("user_plan").insert({
+    user_id: userId,
+    workout_id: progressWorkout.id,
+    position: 2,
+  });
+  if (progressPlanError) throw progressPlanError;
+
+  const { data: priorSession, error: priorSessionError } = await supabase
+    .from("workout_sessions")
+    .insert({
+      user_id: userId,
+      workout_id: progressWorkout.id,
+      status: "completed",
+      started_at: "2026-07-01T08:00:00.000Z",
+      completed_at: "2026-07-01T08:30:00.000Z",
+    })
+    .select("id")
+    .single();
+  if (priorSessionError) throw priorSessionError;
+
+  const { error: priorSetError } = await supabase.from("workout_sets").insert({
+    workout_session_id: priorSession.id,
+    exercise_id: exercise.id,
+    set_number: 1,
+    reps: 10,
+    weight_kg: PROGRESS_WORKOUT_PRIOR_BEST_WEIGHT_KG,
+  });
+  if (priorSetError) throw priorSetError;
 }

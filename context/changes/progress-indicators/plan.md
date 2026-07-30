@@ -302,7 +302,7 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Manual
 
-- [ ] 1.4 RPC verified directly against local Supabase for a hand-verified scenario
+- [x] 1.4 RPC verified directly against local Supabase for a hand-verified scenario
 
 ### Phase 2: Comparison logic & service layer
 
@@ -315,27 +315,27 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Automated
 
-- [x] 3.1 Linting passes: `npm run lint`
-- [x] 3.2 Build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint` — 9276f59
+- [x] 3.2 Build passes: `npm run build` — 9276f59
 
 #### Manual
 
-- [ ] 3.3 Badge appears once, on the newest session's improved exercise's first row
-- [ ] 3.4 No badge on page 2 (older sessions)
-- [ ] 3.5 First-time exercise (no prior session) shows no badge
-- [ ] 3.6 Tied value shows no badge
+- [x] 3.3 Badge appears once, on the newest session's improved exercise's first row
+- [x] 3.4 No badge on page 2 (older sessions)
+- [x] 3.5 First-time exercise (no prior session) shows no badge
+- [x] 3.6 Tied value shows no badge
 
 ### Phase 4: Active session integration (live)
 
 #### Automated
 
-- [ ] 4.1 Linting passes: `npm run lint`
-- [ ] 4.2 Build passes: `npm run build`
-- [ ] 4.3 E2e test passes: `npx playwright test progress-indicator`
+- [x] 4.1 Linting passes: `npm run lint`
+- [x] 4.2 Build passes: `npm run build`
+- [x] 4.3 E2e test passes: `npx playwright test progress-indicator`
 
 #### Manual
 
-- [ ] 4.4 No badge when logged value is at or below the prior best
-- [ ] 4.5 Badge appears immediately (no reload) when value exceeds the prior best
-- [ ] 4.6 Badge disappears live when the value is edited back down
-- [ ] 4.7 Badge state correctly restored on reload/resume mid-session
+- [x] 4.4 No badge when logged value is at or below the prior best
+- [x] 4.5 Badge appears immediately (no reload) when value exceeds the prior best
+- [x] 4.6 Badge disappears live when the value is edited back down
+- [x] 4.7 Badge state correctly restored on reload/resume mid-session

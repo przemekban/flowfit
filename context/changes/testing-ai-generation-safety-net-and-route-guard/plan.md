@@ -175,9 +175,9 @@ None — no schema or data changes.
 
 #### Automated
 
-- [ ] 1.1 `npm run test` passes, including the new `src/middleware.test.ts`
-- [ ] 1.2 `npm run lint` passes
-- [ ] 1.3 `npm run build` passes
+- [x] 1.1 `npm run test` passes, including the new `src/middleware.test.ts`
+- [x] 1.2 `npm run lint` passes
+- [x] 1.3 `npm run build` passes
 
 #### Manual
 

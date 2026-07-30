@@ -1,7 +1,7 @@
 ---
 change_id: testing-ai-generation-safety-net-and-route-guard
 title: Test-plan rollout Phase 3 — AI generation safety net + protected-route guard
-status: planned
+status: implementing
 created: 2026-07-30
 updated: 2026-07-30
 archived_at: null

@@ -127,3 +127,12 @@ export type WorkoutSessionWithSets = WorkoutSession & {
 };
 
 export type LastLoggedSets = Record<string, WorkoutSet | null>;
+
+export interface PreviousExerciseBest {
+  best_weight_kg: number | null;
+  best_duration_seconds: number | null;
+}
+
+export type ExerciseBestsMap = Record<string, PreviousExerciseBest | null>;
+
+export type ExerciseImprovementMap = Record<string, boolean>;

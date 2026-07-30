@@ -139,15 +139,18 @@ export interface SeedSetParams {
   setNumber: number;
   reps?: number;
   weightKg?: number;
+  durationSeconds?: number;
 }
 
 export async function seedSet(admin: SupabaseClient, params: SeedSetParams): Promise<void> {
+  const isDuration = params.durationSeconds !== undefined;
   const { error } = await admin.from("workout_sets").insert({
     workout_session_id: params.sessionId,
     exercise_id: params.exerciseId,
     set_number: params.setNumber,
-    reps: params.reps ?? 10,
-    weight_kg: params.weightKg ?? 20,
+    reps: isDuration ? null : (params.reps ?? 10),
+    duration_seconds: isDuration ? params.durationSeconds : null,
+    weight_kg: params.weightKg ?? (isDuration ? null : 20),
   });
   if (error) throw error;
 }

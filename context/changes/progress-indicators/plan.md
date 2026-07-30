@@ -329,9 +329,9 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Automated
 
-- [x] 4.1 Linting passes: `npm run lint`
-- [x] 4.2 Build passes: `npm run build`
-- [x] 4.3 E2e test passes: `npx playwright test progress-indicator`
+- [x] 4.1 Linting passes: `npm run lint` — 16d968e
+- [x] 4.2 Build passes: `npm run build` — 16d968e
+- [x] 4.3 E2e test passes: `npx playwright test progress-indicator` — 16d968e
 
 #### Manual
 

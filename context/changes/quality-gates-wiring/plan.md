@@ -212,33 +212,33 @@ None — no data, no schema changes. The change is additive GitHub repo configur
 
 #### Automated
 
-- [ ] 1.1 `gh api .../branches/main/protection` returns 200 with expected settings
+- [x] 1.1 `gh api .../branches/main/protection` returns 200 with expected settings — 773cdc5
 
 #### Manual
 
-- [ ] 1.2 GitHub Settings → Branches rule visually matches intended config
-- [ ] 1.3 Live PR shows `ci` as a required, blocking check
+- [x] 1.2 GitHub Settings → Branches rule visually matches intended config — 773cdc5
+- [x] 1.3 Live PR shows `ci` as a required, blocking check — 773cdc5
 
 ### Phase 2: Documentation accuracy
 
 #### Automated
 
-- [ ] 2.1 No "no automated test suite" string remains in AGENTS.md
-- [ ] 2.2 No stale `` `master` `` reference remains in AGENTS.md or README.md
-- [ ] 2.3 `npm run format` clean on both files
+- [x] 2.1 No "no automated test suite" string remains in AGENTS.md — 773cdc5
+- [x] 2.2 No stale `` `master` `` reference remains in AGENTS.md or README.md — 773cdc5
+- [x] 2.3 `npm run format` clean on both files — 773cdc5
 
 #### Manual
 
-- [ ] 2.4 Both CI sections read accurately end-to-end
+- [x] 2.4 Both CI sections read accurately end-to-end — 773cdc5
 
 ### Phase 3: Rollout status + cookbook sync
 
 #### Automated
 
-- [ ] 3.1 Phase 4 row in test-plan.md §3 shows `complete`
-- [ ] 3.2 §6.7 cookbook subsection present
-- [ ] 3.3 `npm run format` clean on test-plan.md
+- [x] 3.1 Phase 4 row in test-plan.md §3 shows `complete` — 773cdc5
+- [x] 3.2 §6.7 cookbook subsection present — 773cdc5
+- [x] 3.3 `npm run format` clean on test-plan.md — 773cdc5
 
 #### Manual
 
-- [ ] 3.4 §5 table and §6.7 note match the real Phase 1 config
+- [x] 3.4 §5 table and §6.7 note match the real Phase 1 config — 773cdc5

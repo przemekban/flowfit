@@ -1,7 +1,7 @@
 ---
 change_id: quality-gates-wiring
 title: Lock unit, integration, and e2e tests into CI as required merge gates
-status: planned
+status: implemented
 created: 2026-07-30
 updated: 2026-07-30
 archived_at: null

@@ -296,9 +296,9 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npx supabase migration up`
-- [x] 1.2 Integration tests pass: `npm run test:integration`
-- [x] 1.3 Linting passes: `npm run lint`
+- [x] 1.1 Migration applies cleanly: `npx supabase migration up` — 9951649
+- [x] 1.2 Integration tests pass: `npm run test:integration` — 9951649
+- [x] 1.3 Linting passes: `npm run lint` — 9951649
 
 #### Manual
 
@@ -308,8 +308,8 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm run test`
-- [ ] 2.2 Linting (type-checked) passes: `npm run lint`
+- [x] 2.1 Unit tests pass: `npm run test`
+- [x] 2.2 Linting (type-checked) passes: `npm run lint`
 
 ### Phase 3: History screen integration
 

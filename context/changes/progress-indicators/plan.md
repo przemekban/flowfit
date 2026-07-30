@@ -308,15 +308,15 @@ Purely additive — one new RPC, no table/column changes, no backfill required. 
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm run test`
-- [x] 2.2 Linting (type-checked) passes: `npm run lint`
+- [x] 2.1 Unit tests pass: `npm run test` — 91f5581
+- [x] 2.2 Linting (type-checked) passes: `npm run lint` — 91f5581
 
 ### Phase 3: History screen integration
 
 #### Automated
 
-- [ ] 3.1 Linting passes: `npm run lint`
-- [ ] 3.2 Build passes: `npm run build`
+- [x] 3.1 Linting passes: `npm run lint`
+- [x] 3.2 Build passes: `npm run build`
 
 #### Manual
 

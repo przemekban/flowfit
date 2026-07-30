@@ -3,8 +3,9 @@ import Layout from "@/layouts/Layout.astro";
 import Topbar from "@/components/Topbar.astro";
 import { createClient } from "@/lib/supabase";
 import { getWorkoutSessionHistory } from "@/lib/services/session";
+import { aggregateSessionBests, computeImprovements, getPreviousExerciseBests } from "@/lib/services/exercise-progress";
 import { buttonVariants } from "@/components/ui/button";
-import type { WorkoutSessionWithSets } from "@/types";
+import type { ExerciseImprovementMap, TrackingType, WorkoutSessionWithSets } from "@/types";
 
 const PAGE_SIZE = 10;
 
@@ -23,6 +24,20 @@ const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
 const offset = (page - 1) * PAGE_SIZE;
 
 const { sessions, hasMore } = await getWorkoutSessionHistory(supabase, user.id, PAGE_SIZE, offset);
+
+const newestSessionId = offset === 0 ? (sessions[0]?.id ?? null) : null;
+let improvements: ExerciseImprovementMap = {};
+if (offset === 0 && sessions.length > 0) {
+  const newestSession = sessions[0];
+  const exerciseIds = [...new Set(newestSession.sets.map((set) => set.exercise_id))];
+  const trackingByExercise: Record<string, TrackingType> = {};
+  for (const set of newestSession.sets) {
+    trackingByExercise[set.exercise_id] = set.exercise.tracking_type;
+  }
+  const previousBests = await getPreviousExerciseBests(supabase, exerciseIds, newestSession.id);
+  const currentBests = aggregateSessionBests(newestSession.sets);
+  improvements = computeImprovements(currentBests, previousBests, trackingByExercise);
+}
 
 const prevPage = page > 1 ? page - 1 : null;
 const nextPage = hasMore ? page + 1 : null;
@@ -55,6 +70,23 @@ function formatSetValue(set: WorkoutSessionWithSets["sets"][number]): string {
   const reps = set.reps != null ? `${set.reps} reps` : "";
   const weight = set.weight_kg != null ? ` × ${set.weight_kg}kg` : "";
   return `${reps}${weight}`;
+}
+
+// Badges only ever appear on the newest session's rows (showBadges gates all others to false), and
+// only once per exercise — on that exercise's first row in set_number order — never once per set.
+function annotateSetsWithBadges(
+  sets: WorkoutSessionWithSets["sets"],
+  showBadges: boolean,
+  improvements: ExerciseImprovementMap,
+): { set: WorkoutSessionWithSets["sets"][number]; showImproved: boolean }[] {
+  const badgedExerciseIds = new Set<string>();
+  return sets.map((set) => {
+    const isFirstRowForExercise = showBadges && !badgedExerciseIds.has(set.exercise_id);
+    if (isFirstRowForExercise) {
+      badgedExerciseIds.add(set.exercise_id);
+    }
+    return { set, showImproved: isFirstRowForExercise && (improvements[set.exercise_id] ?? false) };
+  });
 }
 ---
 
@@ -103,14 +135,21 @@ function formatSetValue(set: WorkoutSessionWithSets["sets"][number]): string {
                 </div>
 
                 <ul class="mt-4 space-y-2">
-                  {session.sets.map((set) => (
-                    <li class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-blue-100/90">
-                      <span>
-                        {set.exercise.name} · Set {set.set_number}
-                      </span>
-                      <span class="text-blue-100/60">{formatSetValue(set)}</span>
-                    </li>
-                  ))}
+                  {annotateSetsWithBadges(session.sets, session.id === newestSessionId, improvements).map(
+                    ({ set, showImproved }) => (
+                      <li class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-blue-100/90">
+                        <span class="flex items-center gap-2">
+                          {set.exercise.name} · Set {set.set_number}
+                          {showImproved && (
+                            <span class="rounded-full border border-sky-500/30 bg-sky-900/30 px-2 py-0.5 text-xs text-sky-300">
+                              Improved
+                            </span>
+                          )}
+                        </span>
+                        <span class="text-blue-100/60">{formatSetValue(set)}</span>
+                      </li>
+                    ),
+                  )}
                 </ul>
               </div>
             ))}

@@ -175,24 +175,24 @@ None — no schema or data changes.
 
 #### Automated
 
-- [x] 1.1 `npm run test` passes, including the new `src/middleware.test.ts`
-- [x] 1.2 `npm run lint` passes
-- [x] 1.3 `npm run build` passes
+- [x] 1.1 `npm run test` passes, including the new `src/middleware.test.ts` — 2bd9c1a
+- [x] 1.2 `npm run lint` passes — 2bd9c1a
+- [x] 1.3 `npm run build` passes — 2bd9c1a
 
 #### Manual
 
-- [ ] 1.4 Logged-out visits to `/dashboard`, `/history`, `/session/<any-id>`, `/onboarding` redirect to `/auth/signin`
-- [ ] 1.5 Logged-in, no-profile visit to `/dashboard` redirects to `/onboarding`
-- [ ] 1.6 Post-onboarding revisit to `/dashboard` loads normally
+- [x] 1.4 Logged-out visits to `/dashboard`, `/history`, `/session/<any-id>`, `/onboarding` redirect to `/auth/signin`
+- [x] 1.5 Logged-in, no-profile visit to `/dashboard` redirects to `/onboarding`
+- [x] 1.6 Post-onboarding revisit to `/dashboard` loads normally
 
 ### Phase 2: Risk #6 — AI generation safety net
 
 #### Automated
 
-- [ ] 2.1 `npm run test` passes, including the extended `src/lib/services/plan.test.ts`
-- [ ] 2.2 `npm run lint` passes
-- [ ] 2.3 `npm run build` passes
+- [x] 2.1 `npm run test` passes, including the extended `src/lib/services/plan.test.ts`
+- [x] 2.2 `npm run lint` passes
+- [x] 2.3 `npm run build` passes
 
 #### Manual
 
-- [ ] 2.4 Normal-equipment plan generation still succeeds end-to-end in local dev
+- [x] 2.4 Normal-equipment plan generation still succeeds end-to-end in local dev

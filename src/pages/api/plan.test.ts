@@ -95,4 +95,19 @@ describe("POST /api/plan", () => {
     await expect(response.json()).resolves.toEqual({ error: "ai_error", message: "Not enough exercises match" });
     expect(rpcMock).not.toHaveBeenCalled();
   });
+
+  it("returns 500 db_error (not 502 ai_error) when getCandidateExercises rejects with a database error", async () => {
+    getUserProfileMock.mockResolvedValue({ id: "user-1", sessions_per_week: 3 });
+    getCandidateExercisesMock.mockRejectedValue(new Error("connection refused"));
+    const context = buildContext(authedUser);
+
+    const response = await POST(context);
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: "db_error",
+      message: "Failed to load exercises for your training plan",
+    });
+    expect(generateTrainingPlanMock).not.toHaveBeenCalled();
+  });
 });

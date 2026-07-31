@@ -103,6 +103,6 @@ None — no data model or schema change.
 
 #### Automated
 
-- [x] 1.1 Unit/integration test passes: `npm run test -- plan.test.ts`
-- [x] 1.2 Full unit test suite passes: `npm run test`
-- [x] 1.3 Type checking passes via lint: `npm run lint`
+- [x] 1.1 Unit/integration test passes: `npm run test -- plan.test.ts` — f923c8a
+- [x] 1.2 Full unit test suite passes: `npm run test` — f923c8a
+- [x] 1.3 Type checking passes via lint: `npm run lint` — f923c8a

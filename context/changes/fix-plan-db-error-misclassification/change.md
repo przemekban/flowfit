@@ -1,7 +1,7 @@
 ---
 change_id: fix-plan-db-error-misclassification
 title: Fix POST /api/plan misclassifying DB errors from getCandidateExercises as ai_error
-status: implementing
+status: implemented
 created: 2026-07-31
 updated: 2026-07-31
 archived_at: null

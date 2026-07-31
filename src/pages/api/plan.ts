@@ -34,9 +34,19 @@ export const POST: APIRoute = async (context) => {
     return Response.json({ error: "ai_error", message: "AI provider is not configured" }, { status: 502 });
   }
 
+  let candidates: Awaited<ReturnType<typeof getCandidateExercises>>;
+  try {
+    candidates = await getCandidateExercises(supabase, profile);
+  } catch (err) {
+    console.error("Candidate exercise lookup failed", { userId, cause: err });
+    return Response.json(
+      { error: "db_error", message: "Failed to load exercises for your training plan" },
+      { status: 500 },
+    );
+  }
+
   let planPayload: { workouts: unknown[] };
   try {
-    const candidates = await getCandidateExercises(supabase, profile);
     const plan = await generateTrainingPlan(gemini, profile, candidates);
     planPayload = validatePlanAgainstCandidates(plan, candidates);
   } catch (err) {

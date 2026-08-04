@@ -179,8 +179,8 @@ N/A — net-new script, no existing data or behavior to migrate.
 
 #### Automated
 
-- [x] 2.1 npm run review:sample exits 0 and prints a JSON object to stdout
+- [x] 2.1 npm run review:sample exits 0 and prints a JSON object to stdout — 6aa4e1a
 
 #### Manual
 
-- [ ] 2.2 Printed JSON has five in-range scores, a pass/fail verdict, and a non-empty summary
+- [x] 2.2 Printed JSON has five in-range scores, a pass/fail verdict, and a non-empty summary — 6aa4e1a

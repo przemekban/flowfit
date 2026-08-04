@@ -37,7 +37,6 @@ pnpm-debug.log*
 .claude/*
 !.claude/settings.json
 
-# scraper 
-scripts/*
-!scripts/post-tool-hook.cjs
+# one-off scraper/seed-generation scripts (used once to build the exercise seed data)
+scripts/local/
 exercises-raw.json

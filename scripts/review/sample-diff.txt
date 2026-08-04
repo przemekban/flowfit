@@ -1,0 +1,40 @@
+diff --git a/src/lib/utils/discount.ts b/src/lib/utils/discount.ts
+new file mode 100644
+index 0000000..3f6a9c1
+--- /dev/null
++++ b/src/lib/utils/discount.ts
+@@ -0,0 +1,13 @@
++export function applyDiscount(price: number, percent: number): number {
++  if (percent < 0 || percent > 100) {
++    throw new Error("percent must be between 0 and 100");
++  }
++  return price - (price * percent) / 100;
++}
++
++// Same calculation, but skips validation for callers that already trust their input.
++export function applyDiscountUnsafe(price: number, percent: number): number {
++  return price - (price * percent) / 100;
++}
++
++export const MAX_DISCOUNT_PERCENT = 100;
+diff --git a/src/pages/api/cart/checkout.ts b/src/pages/api/cart/checkout.ts
+index 8a1f2e4..b2c9d70 100644
+--- a/src/pages/api/cart/checkout.ts
++++ b/src/pages/api/cart/checkout.ts
+@@ -1,5 +1,6 @@
+ import type { APIRoute } from "astro";
+ import { z } from "zod";
++import { applyDiscountUnsafe } from "@/lib/utils/discount";
+
+ export const prerender = false;
+
+@@ -18,7 +19,8 @@ export const POST: APIRoute = async ({ request }) => {
+     return new Response(JSON.stringify({ error: parsed.error.message }), { status: 400 });
+   }
+
+-  const total = parsed.data.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
++  let total = parsed.data.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
++  total = applyDiscountUnsafe(total, parsed.data.discountPercent);
+
+   return new Response(JSON.stringify({ total }), { status: 200 });
+ };

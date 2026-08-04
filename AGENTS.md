@@ -50,9 +50,16 @@ Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` 
 - Auth pages: `src/pages/auth/{signin,signup,confirm-email}.astro`
 - Env vars go in `.dev.vars` for Cloudflare local dev, `.env` for Node. See @README.md for full setup.
 
-## PRs & Issues
+## Change Workflow & PRs
 
-- This repo's roadmap slices are tracked as GitHub Issues (see `context/foundation/roadmap.md` for the Change ID ↔ issue mapping). When a PR implements one, its body must include a closing keyword (`Closes #N`) so the issue auto-closes on merge — this has been missed more than once, leaving shipped work showing as an open issue.
+Standard order for a roadmap slice or fix, so archiving never gets skipped and a forgotten step never needs a second PR:
+
+1. `/10x-new` — create `context/changes/<change-id>/`
+2. Research/plan (`/10x-frame`, `/10x-plan`) — produce `plan.md`
+3. Implement (`/10x-implement`, `/10x-tdd`, `/10x-e2e` as applicable)
+4. `/10x-archive` the change — moves the folder to `context/archive/` and marks it archived. Do this **before** opening the PR, not after.
+5. Open the PR, with the archive commit included. Body must include a closing keyword (`Closes #N`) for the roadmap issue this implements (see `context/foundation/roadmap.md` for the Change ID ↔ issue mapping) — this has been missed more than once, leaving shipped work showing as an open issue.
+
 - If a PR already merged without the keyword, close the issue manually right away with a comment linking the PR (`gh issue close N --comment "Implemented and merged via #M."`).
 
 ## CI

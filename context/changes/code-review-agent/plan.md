@@ -169,17 +169,17 @@ N/A — net-new script, no existing data or behavior to migrate.
 
 #### Automated
 
-- [x] 1.1 npm run lint passes on scripts/review.ts and scripts/review/schema.ts
+- [x] 1.1 npm run lint passes on scripts/review.ts and scripts/review/schema.ts — a324d3b
 
 #### Manual
 
-- [ ] 1.2 Empty stdin produces a clear error message, not a hang or opaque stack trace
+- [x] 1.2 Empty stdin produces a clear error message, not a hang or opaque stack trace — a324d3b
 
 ### Phase 2: Verification fixture
 
 #### Automated
 
-- [ ] 2.1 npm run review:sample exits 0 and prints a JSON object to stdout
+- [x] 2.1 npm run review:sample exits 0 and prints a JSON object to stdout
 
 #### Manual
 

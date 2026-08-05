@@ -1,0 +1,108 @@
+name: "AI PR Reviewer"
+description: "Runs the FlowFit AI code reviewer against a PR diff and reports the result via a PR comment and labels."
+
+inputs:
+  github-token:
+    description: "Token used for PR comment and label operations (gh CLI)"
+    required: true
+  gemini-api-key:
+    description: "Gemini API key used by the reviewer (scripts/review.ts)"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Compute PR diff
+      id: diff
+      shell: bash
+      run: |
+        git diff origin/main...HEAD -- . ':(exclude)package-lock.json' ':(exclude)skills-lock.json' > "$RUNNER_TEMP/pr.diff"
+        if [ -s "$RUNNER_TEMP/pr.diff" ]; then
+          echo "empty=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "empty=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run reviewer
+      id: review
+      if: steps.diff.outputs.empty == 'false'
+      shell: bash
+      env:
+        GEMINI_API_KEY: ${{ inputs.gemini-api-key }}
+      run: |
+        {
+          echo "PR Title: $PR_TITLE"
+          echo
+          echo "PR Description:"
+          echo "$PR_BODY"
+          echo
+          echo "git diff:"
+          cat "$RUNNER_TEMP/pr.diff"
+        } | npx tsx scripts/review.ts > "$RUNNER_TEMP/review.json"
+
+    - name: Evaluate verdict
+      id: gate
+      if: steps.diff.outputs.empty == 'false'
+      shell: bash
+      run: |
+        VERDICT=$(jq -r '.verdict' "$RUNNER_TEMP/review.json")
+        SUMMARY=$(jq -r '.summary' "$RUNNER_TEMP/review.json")
+
+        echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+        {
+          echo "summary<<REVIEW_SUMMARY_EOF"
+          echo "$SUMMARY"
+          echo "REVIEW_SUMMARY_EOF"
+        } >> "$GITHUB_OUTPUT"
+
+        if [ "$VERDICT" = "fail" ]; then
+          echo "Review verdict: fail"
+          exit 1
+        fi
+
+    - name: Auto-pass (empty diff)
+      id: autopass
+      if: steps.diff.outputs.empty == 'true'
+      shell: bash
+      run: |
+        echo "verdict=pass" >> "$GITHUB_OUTPUT"
+        {
+          echo "summary<<REVIEW_SUMMARY_EOF"
+          echo "No reviewable changes (diff empty after excluding lockfiles) — auto-passed."
+          echo "REVIEW_SUMMARY_EOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Post review comment
+      if: always()
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        SUMMARY: ${{ steps.gate.outputs.summary || steps.autopass.outputs.summary }}
+      run: |
+        if [ -z "$PR_NUMBER" ]; then
+          echo "No PR number in context, skipping comment."
+          exit 0
+        fi
+        gh pr comment "$PR_NUMBER" --body "$SUMMARY"
+
+    - name: Apply review label
+      if: always()
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        VERDICT: ${{ steps.gate.outputs.verdict || steps.autopass.outputs.verdict }}
+      run: |
+        if [ -z "$PR_NUMBER" ]; then
+          echo "No PR number in context, skipping labels."
+          exit 0
+        fi
+
+        if [ "$VERDICT" = "pass" ]; then
+          gh pr edit "$PR_NUMBER" --add-label "ai-cr:passed" --remove-label "ai-cr:failed"
+        else
+          gh pr edit "$PR_NUMBER" --add-label "ai-cr:failed" --remove-label "ai-cr:passed"
+        fi
+
+        if [ "${{ github.event.action == 'labeled' && github.event.label.name == 'ai-cr:review' }}" = "true" ]; then
+          gh pr edit "$PR_NUMBER" --remove-label "ai-cr:review"
+        fi

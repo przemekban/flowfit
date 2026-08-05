@@ -14,7 +14,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "review": "tsx --env-file=.env scripts/review.ts",
-    "review:sample": "tsx --env-file=.env scripts/review.ts < scripts/review/sample-diff.txt"
+    "review:sample": "tsx --env-file=.env scripts/review.ts < scripts/review/sample-diff.txt",
+    "review:eval": "promptfoo eval -c scripts/review/eval/promptfooconfig.yaml"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.33",

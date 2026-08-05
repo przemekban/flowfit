@@ -245,23 +245,23 @@ Not applicable — no persisted data or schema involved.
 
 #### Automated
 
-- [x] 2.1 Lint passes on the new TS files: `npm run lint`
-- [x] 2.2 YAML config is well-formed and providers/tests resolve: `npx promptfoo validate -c scripts/review/eval/promptfooconfig.yaml`
+- [x] 2.1 Lint passes on the new TS files: `npm run lint` — 0a3e5f3
+- [x] 2.2 YAML config is well-formed and providers/tests resolve: `npx promptfoo validate -c scripts/review/eval/promptfooconfig.yaml` — 0a3e5f3
 
 #### Manual
 
-- [x] 2.3 `npx promptfoo eval -c scripts/review/eval/promptfooconfig.yaml` runs successfully against all 3 models
-- [x] 2.4 The static verdict assertion reports pass for every model — deviation confirmed by user: only gemini-3.6-flash returns verdict "fail"; the two lite-tier models name the gap in their summary but still return "pass", contradicting the system prompt's own zero-tolerance rule. Accepted as a genuine eval finding, not a harness defect.
-- [x] 2.5 The LLM-judge assertion's per-model reasoning is manually confirmed to be grading gap-identification correctly
+- [x] 2.3 `npx promptfoo eval -c scripts/review/eval/promptfooconfig.yaml` runs successfully against all 3 models — 0a3e5f3
+- [x] 2.4 The static verdict assertion reports pass for every model — deviation confirmed by user: only gemini-3.6-flash returns verdict "fail"; the two lite-tier models name the gap in their summary but still return "pass", contradicting the system prompt's own zero-tolerance rule. Accepted as a genuine eval finding, not a harness defect. — 0a3e5f3
+- [x] 2.5 The LLM-judge assertion's per-model reasoning is manually confirmed to be grading gap-identification correctly — 0a3e5f3
 
 ### Phase 3: Wire up and document
 
 #### Automated
 
-- [ ] 3.1 `npm run lint` passes with the new script present
-- [ ] 3.2 `npm run review:eval` is invocable
+- [x] 3.1 `npm run lint` passes with the new script present
+- [x] 3.2 `npm run review:eval` is invocable
 
 #### Manual
 
-- [ ] 3.3 `npm run review:eval` produces the same comparison table as the direct `npx promptfoo eval` command
-- [ ] 3.4 A teammate unfamiliar with the change can understand the command's purpose and CI-exclusion from the usage note
+- [x] 3.3 `npm run review:eval` produces the same comparison table as the direct `npx promptfoo eval` command — confirmed equivalent invocation by user; per-run pass/fail differences are LLM sampling variance on the borderline verdict call, not a wiring discrepancy
+- [x] 3.4 A teammate unfamiliar with the change can understand the command's purpose and CI-exclusion from the usage note

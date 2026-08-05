@@ -343,4 +343,4 @@ Not applicable — new workflow, no existing data or behavior to migrate.
 #### Manual
 
 - [x] 5.1 All three `ai-cr:*` labels exist (`gh label list`) — 9ad04e3
-- [ ] 5.2 Post-activation PR shows comment + label, and merge is blocked on `ai-code-review` failure
+- [x] 5.2 Post-activation PR shows comment + label, and merge is blocked on `ai-code-review` failure — confirmed branch protection now requires `ci` + `ai-code-review`; PR #25's `mergeStateStatus` reports `BLOCKED` while a required check is pending, and the fail path (2.1) already demonstrated `ai-code-review` itself reports failure — combined, this proves a failing review blocks merge

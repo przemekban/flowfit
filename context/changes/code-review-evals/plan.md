@@ -258,10 +258,10 @@ Not applicable — no persisted data or schema involved.
 
 #### Automated
 
-- [x] 3.1 `npm run lint` passes with the new script present
-- [x] 3.2 `npm run review:eval` is invocable
+- [x] 3.1 `npm run lint` passes with the new script present — 40f0cfe
+- [x] 3.2 `npm run review:eval` is invocable — 40f0cfe
 
 #### Manual
 
-- [x] 3.3 `npm run review:eval` produces the same comparison table as the direct `npx promptfoo eval` command — confirmed equivalent invocation by user; per-run pass/fail differences are LLM sampling variance on the borderline verdict call, not a wiring discrepancy
-- [x] 3.4 A teammate unfamiliar with the change can understand the command's purpose and CI-exclusion from the usage note
+- [x] 3.3 `npm run review:eval` produces the same comparison table as the direct `npx promptfoo eval` command — confirmed equivalent invocation by user; per-run pass/fail differences are LLM sampling variance on the borderline verdict call, not a wiring discrepancy — 40f0cfe
+- [x] 3.4 A teammate unfamiliar with the change can understand the command's purpose and CI-exclusion from the usage note — 40f0cfe

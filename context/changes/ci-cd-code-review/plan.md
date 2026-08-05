@@ -315,7 +315,7 @@ Not applicable — new workflow, no existing data or behavior to migrate.
 
 - [x] 2.1 Intentional violation diff produces `verdict=fail` and a failing step — 9ad04e3
 - [x] 2.2 Clean diff produces `verdict=pass` and a succeeding step — 9ad04e3
-- [ ] 2.3 PR title/description content reaches the model (visible in `review.summary`)
+- [x] 2.3 PR title/description content reaches the model — confirmed via runner step env (`PR_TITLE`/`PR_BODY` correctly populated and piped to stdin before the diff), not via summary spot-check (description text overlaps too much with the diff to distinguish)
 
 ### Phase 3: Composite action — PR comment & labels
 

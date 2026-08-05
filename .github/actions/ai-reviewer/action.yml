@@ -83,6 +83,9 @@ runs:
           echo "No PR number in context, skipping comment."
           exit 0
         fi
+        if [ -z "$SUMMARY" ]; then
+          SUMMARY="AI review failed to complete (the reviewer step crashed before producing a verdict). See the workflow run logs for details."
+        fi
         gh pr comment "$PR_NUMBER" --body "$SUMMARY"
 
     - name: Apply review label

@@ -14,7 +14,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "review": "tsx --env-file=.env scripts/review.ts",
-    "review:sample": "tsx --env-file=.env scripts/review.ts < scripts/review/sample-diff.txt"
+    "review:sample": "tsx --env-file=.env scripts/review.ts < scripts/review/sample-diff.txt",
+    "review:eval": "promptfoo eval -c scripts/review/eval/promptfooconfig.yaml"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.33",
@@ -62,6 +63,7 @@
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "promptfoo": "^0.122.0",
     "supabase": "^2.23.4",
     "tsx": "^4.23.5",
     "typescript": "^5.9.3",

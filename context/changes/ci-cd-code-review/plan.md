@@ -302,7 +302,7 @@ Not applicable — new workflow, no existing data or behavior to migrate.
 
 #### Automated
 
-- [x] 1.1 `action.yml` is valid composite-action YAML
+- [x] 1.1 `action.yml` is valid composite-action YAML — 78f3377
 
 #### Manual
 
@@ -329,8 +329,8 @@ Not applicable — new workflow, no existing data or behavior to migrate.
 
 #### Automated
 
-- [x] 4.1 Workflow file passes GitHub's YAML validation
-- [x] 4.2 `npm run lint` / `npm run test` unaffected
+- [x] 4.1 Workflow file passes GitHub's YAML validation — 78f3377
+- [x] 4.2 `npm run lint` / `npm run test` unaffected — 78f3377
 
 #### Manual
 

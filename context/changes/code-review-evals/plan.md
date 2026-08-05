@@ -234,12 +234,12 @@ Not applicable — no persisted data or schema involved.
 
 #### Automated
 
-- [ ] 1.1 Lint (includes type-checked rules) passes: `npm run lint`
-- [ ] 1.2 Existing review scripts still run end-to-end unchanged: `npm run review:sample`
+- [x] 1.1 Lint (includes type-checked rules) passes: `npm run lint`
+- [x] 1.2 Existing review scripts still run end-to-end unchanged: `npm run review:sample`
 
 #### Manual
 
-- [ ] 1.3 `node -v` reflects `22.22.0`+ and `npx promptfoo --version` resolves without a Node-engine error
+- [x] 1.3 `node -v` reflects `22.22.0`+ and `npx promptfoo --version` resolves without a Node-engine error
 
 ### Phase 2: promptfoo eval matrix
 

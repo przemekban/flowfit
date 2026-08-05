@@ -1,0 +1,27 @@
+description: "Gemini tier comparison for scripts/review.ts's PR-review agent"
+
+prompts:
+  - "{{diff}}"
+
+providers:
+  - id: file://provider.ts
+    label: gemini-3.1-flash-lite
+    config:
+      model: gemini-3.1-flash-lite
+  - id: file://provider.ts
+    label: gemini-3.5-flash-lite
+    config:
+      model: gemini-3.5-flash-lite
+  - id: file://provider.ts
+    label: gemini-3.6-flash
+    config:
+      model: gemini-3.6-flash
+
+tests:
+  - vars:
+      diff: file://../sample-diff.txt
+    assert:
+      - type: javascript
+        value: "output.verdict === 'fail'"
+      - type: javascript
+        value: file://gap-judge-assert.ts

@@ -234,25 +234,25 @@ Not applicable — no persisted data or schema involved.
 
 #### Automated
 
-- [x] 1.1 Lint (includes type-checked rules) passes: `npm run lint`
-- [x] 1.2 Existing review scripts still run end-to-end unchanged: `npm run review:sample`
+- [x] 1.1 Lint (includes type-checked rules) passes: `npm run lint` — b823ede
+- [x] 1.2 Existing review scripts still run end-to-end unchanged: `npm run review:sample` — b823ede
 
 #### Manual
 
-- [x] 1.3 `node -v` reflects `22.22.0`+ and `npx promptfoo --version` resolves without a Node-engine error
+- [x] 1.3 `node -v` reflects `22.22.0`+ and `npx promptfoo --version` resolves without a Node-engine error — b823ede
 
 ### Phase 2: promptfoo eval matrix
 
 #### Automated
 
-- [ ] 2.1 Lint passes on the new TS files: `npm run lint`
-- [ ] 2.2 YAML config is well-formed and providers/tests resolve: `npx promptfoo validate -c scripts/review/eval/promptfooconfig.yaml`
+- [x] 2.1 Lint passes on the new TS files: `npm run lint`
+- [x] 2.2 YAML config is well-formed and providers/tests resolve: `npx promptfoo validate -c scripts/review/eval/promptfooconfig.yaml`
 
 #### Manual
 
-- [ ] 2.3 `npx promptfoo eval -c scripts/review/eval/promptfooconfig.yaml` runs successfully against all 3 models
-- [ ] 2.4 The static verdict assertion reports pass for every model
-- [ ] 2.5 The LLM-judge assertion's per-model reasoning is manually confirmed to be grading gap-identification correctly
+- [x] 2.3 `npx promptfoo eval -c scripts/review/eval/promptfooconfig.yaml` runs successfully against all 3 models
+- [x] 2.4 The static verdict assertion reports pass for every model — deviation confirmed by user: only gemini-3.6-flash returns verdict "fail"; the two lite-tier models name the gap in their summary but still return "pass", contradicting the system prompt's own zero-tolerance rule. Accepted as a genuine eval finding, not a harness defect.
+- [x] 2.5 The LLM-judge assertion's per-model reasoning is manually confirmed to be grading gap-identification correctly
 
 ### Phase 3: Wire up and document
 

@@ -2,7 +2,7 @@ name: AI PR Review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, reopened, labeled]
     branches: [main]
   workflow_dispatch:
 

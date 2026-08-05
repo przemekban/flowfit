@@ -47,12 +47,40 @@ runs:
       run: |
         VERDICT=$(jq -r '.verdict' "$RUNNER_TEMP/review.json")
         SUMMARY=$(jq -r '.summary' "$RUNNER_TEMP/review.json")
+        IMPLEMENTATION_CORRECTNESS=$(jq -r '.implementationCorrectness' "$RUNNER_TEMP/review.json")
+        IDIOMATICITY=$(jq -r '.idiomaticity' "$RUNNER_TEMP/review.json")
+        COMPLEXITY=$(jq -r '.complexity' "$RUNNER_TEMP/review.json")
+        TEST_RISK_COVERAGE=$(jq -r '.testRiskCoverage' "$RUNNER_TEMP/review.json")
+        SECURITY_SAFETY=$(jq -r '.securitySafety' "$RUNNER_TEMP/review.json")
+
+        if [ "$VERDICT" = "pass" ]; then
+          BADGE="✅ PASSED"
+        else
+          BADGE="❌ FAILED"
+        fi
+
+        COMMENT_BODY=$(cat <<EOF
+        ## AI Code Review: $BADGE
+
+        | Criterion | Score |
+        | --- | --- |
+        | Implementation correctness | ${IMPLEMENTATION_CORRECTNESS}/10 |
+        | Idiomaticity | ${IDIOMATICITY}/10 |
+        | Complexity | ${COMPLEXITY}/10 |
+        | Test risk coverage | ${TEST_RISK_COVERAGE}/10 |
+        | Security & safety | ${SECURITY_SAFETY}/10 |
+
+        ### Summary
+
+        $SUMMARY
+        EOF
+        )
 
         echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
         {
-          echo "summary<<REVIEW_SUMMARY_EOF"
-          echo "$SUMMARY"
-          echo "REVIEW_SUMMARY_EOF"
+          echo "comment_body<<REVIEW_COMMENT_EOF"
+          echo "$COMMENT_BODY"
+          echo "REVIEW_COMMENT_EOF"
         } >> "$GITHUB_OUTPUT"
 
         if [ "$VERDICT" = "fail" ]; then
@@ -67,9 +95,11 @@ runs:
       run: |
         echo "verdict=pass" >> "$GITHUB_OUTPUT"
         {
-          echo "summary<<REVIEW_SUMMARY_EOF"
-          echo "No reviewable changes (diff empty after excluding lockfiles) — auto-passed."
-          echo "REVIEW_SUMMARY_EOF"
+          echo "comment_body<<REVIEW_COMMENT_EOF"
+          echo "## AI Code Review: ✅ PASSED (auto-pass)"
+          echo
+          echo "No reviewable changes after excluding lockfiles — the diff was empty, so the reviewer was not invoked."
+          echo "REVIEW_COMMENT_EOF"
         } >> "$GITHUB_OUTPUT"
 
     - name: Post review comment
@@ -77,16 +107,19 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github-token }}
-        SUMMARY: ${{ steps.gate.outputs.summary || steps.autopass.outputs.summary }}
+        COMMENT_BODY: ${{ steps.gate.outputs.comment_body || steps.autopass.outputs.comment_body }}
       run: |
         if [ -z "$PR_NUMBER" ]; then
           echo "No PR number in context, skipping comment."
           exit 0
         fi
-        if [ -z "$SUMMARY" ]; then
-          SUMMARY="AI review failed to complete (the reviewer step crashed before producing a verdict). See the workflow run logs for details."
+        if [ -z "$COMMENT_BODY" ]; then
+          COMMENT_BODY="## AI Code Review: ❌ FAILED (crashed)
+
+        AI review failed to complete (the reviewer step crashed before producing a verdict, e.g. a missing GEMINI_API_KEY or an API error). See the workflow run logs for details."
         fi
-        gh pr comment "$PR_NUMBER" --body "$SUMMARY"
+
+        gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
 
     - name: Apply review label
       if: always()

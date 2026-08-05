@@ -306,24 +306,24 @@ Not applicable — new workflow, no existing data or behavior to migrate.
 
 #### Manual
 
-- [ ] 1.2 Diff file correctly excludes lockfile-only hunks
-- [ ] 1.3 Lockfile-only PR produces `empty=true`
+- [x] 1.2 Diff file correctly excludes lockfile-only hunks — 9ad04e3
+- [x] 1.3 Lockfile-only PR produces `empty=true` — 9ad04e3
 
 ### Phase 2: Composite action — run reviewer & verdict gate
 
 #### Manual
 
-- [ ] 2.1 Intentional violation diff produces `verdict=fail` and a failing step
-- [ ] 2.2 Clean diff produces `verdict=pass` and a succeeding step
+- [x] 2.1 Intentional violation diff produces `verdict=fail` and a failing step — 9ad04e3
+- [x] 2.2 Clean diff produces `verdict=pass` and a succeeding step — 9ad04e3
 - [ ] 2.3 PR title/description content reaches the model (visible in `review.summary`)
 
 ### Phase 3: Composite action — PR comment & labels
 
 #### Manual
 
-- [ ] 3.1 New PR comment appears with exact `review.summary` content
-- [ ] 3.2 Correct label applied and opposite label removed on verdict flip
-- [ ] 3.3 `ai-cr:review` label removed automatically after retry run
+- [x] 3.1 New PR comment appears with exact `review.summary` content — 9ad04e3
+- [x] 3.2 Correct label applied and opposite label removed on verdict flip — 9ad04e3
+- [x] 3.3 `ai-cr:review` label removed automatically after retry run — 9ad04e3
 
 ### Phase 4: Consumer workflow (`review.yml`)
 
@@ -334,13 +334,13 @@ Not applicable — new workflow, no existing data or behavior to migrate.
 
 #### Manual
 
-- [ ] 4.3 `ai-code-review` job appears and completes on a real PR
-- [ ] 4.4 New commit to PR triggers a fresh run
-- [ ] 4.5 `workflow_dispatch` completes without a PR-context error
+- [x] 4.3 `ai-code-review` job appears and completes on a real PR — 9ad04e3
+- [x] 4.4 New commit to PR triggers a fresh run — 9ad04e3
+- [x] 4.5 `workflow_dispatch` completes without a PR-context error — 9ad04e3
 
 ### Phase 5: Repository activation (manual, non-code)
 
 #### Manual
 
-- [ ] 5.1 All three `ai-cr:*` labels exist (`gh label list`)
+- [x] 5.1 All three `ai-cr:*` labels exist (`gh label list`) — 9ad04e3
 - [ ] 5.2 Post-activation PR shows comment + label, and merge is blocked on `ai-code-review` failure

@@ -80,10 +80,10 @@ None — one static anchor tag.
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Build succeeds: `npm run build`
+- [x] 1.1 Lint passes: `npm run lint` — 7f838f3
+- [x] 1.2 Build succeeds: `npm run build` — 7f838f3
 
 #### Manual
 
-- [x] 1.3 "Edit profile" link visible and working from `/dashboard` and `/history` — verified via temporary Playwright script against local Supabase (signed-in seeded user, link visible on both pages, click lands on `/onboarding` showing the profile summary)
-- [x] 1.4 Signed-out Topbar unchanged — verified via the same script (`/auth/signin` shows no "Edit profile" link)
+- [x] 1.3 "Edit profile" link visible and working from `/dashboard` and `/history` — verified via temporary Playwright script against local Supabase (signed-in seeded user, link visible on both pages, click lands on `/onboarding` showing the profile summary) — 7f838f3
+- [x] 1.4 Signed-out Topbar unchanged — verified via the same script (`/auth/signin` shows no "Edit profile" link) — 7f838f3

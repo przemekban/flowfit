@@ -1,7 +1,7 @@
 ---
 change_id: landing-page-branding
 title: Replace generic homepage copy and CTAs with FlowFit-specific content
-status: implementing
+status: implemented
 created: 2026-08-07
 updated: 2026-08-07
 archived_at: null

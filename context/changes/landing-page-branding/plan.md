@@ -190,9 +190,9 @@ Not applicable — no data model or schema changes.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `npx astro check`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Build succeeds: `npm run build`
+- [x] 2.1 Type checking passes: `npx astro check` — 1c725e1
+- [x] 2.2 Linting passes: `npm run lint` — 1c725e1
+- [x] 2.3 Build succeeds: `npm run build` — 1c725e1
 
 #### Manual
 

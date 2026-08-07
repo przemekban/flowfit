@@ -176,25 +176,25 @@ Not applicable — no data model or schema changes.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npx astro check`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Build succeeds: `npm run build`
+- [x] 1.1 Type checking passes: `npx astro check` — f9f47b2
+- [x] 1.2 Linting passes: `npm run lint` — f9f47b2
+- [x] 1.3 Build succeeds: `npm run build` — f9f47b2
 
 #### Manual
 
-- [ ] 1.4 Logged-out `/` shows FlowFit heading, new tagline, Sign In/Sign Up buttons linking correctly
-- [ ] 1.5 Logged-in `/` shows Dashboard/History buttons linking correctly
-- [ ] 1.6 Browser tab title reads "FlowFit" on `/`
+- [x] 1.4 Logged-out `/` shows FlowFit heading, new tagline, Sign In/Sign Up buttons linking correctly
+- [x] 1.5 Logged-in `/` shows Dashboard/History buttons linking correctly
+- [x] 1.6 Browser tab title reads "FlowFit" on `/`
 
 ### Phase 2: Feature cards rewrite
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npx astro check`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Build succeeds: `npm run build`
+- [x] 2.1 Type checking passes: `npx astro check`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 3 feature cards show new titles/descriptions/icons correctly
-- [ ] 2.5 Visual style unchanged from current cosmic theme
+- [x] 2.4 3 feature cards show new titles/descriptions/icons correctly
+- [x] 2.5 Visual style unchanged from current cosmic theme
